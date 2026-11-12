@@ -65,7 +65,8 @@ function icon(id, size) {
 
 /* ---------- 数据加载 ---------- */
 async function boot() {
-  const load = (f) => fetch(`./data/${f}`).then((r) => r.json());
+  const DATA_V = '4';   // 数据版本：重新生成 JSON 后递增，绕过 CDN 缓存
+  const load = (f) => fetch(`./data/${f}?v=${DATA_V}`, { cache: 'no-cache' }).then((r) => r.json());
   const [organs, scores, cavities, invTypes, events, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
     load('inventory_types.json'), load('events.json'), load('atlas.json'),
