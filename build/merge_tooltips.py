@@ -6,7 +6,7 @@ from pathlib import Path
 BASE = Path('D:/SelfAgent/work/organ-codex')
 SITE = BASE / 'site'
 organs = json.load(open(SITE / 'data/organs.json', encoding='utf-8'))
-logic = json.load(open(SITE / 'data/logic.json', encoding='utf-8'))
+logic = json.load(open(BASE / 'build/logic.json', encoding='utf-8'))
 by_id = {o['id']: o for o in organs}
 
 merged, problems, flagged = {}, [], []

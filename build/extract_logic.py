@@ -5,7 +5,7 @@ from pathlib import Path
 
 PACK = Path('D:/hermes-workspace/ribcage-ws/RibCage')
 JS_DIR = PACK / 'kubejs/server_scripts/domain/organ/organ'
-OUT = Path('D:/SelfAgent/work/organ-codex/site/data/logic.json')
+OUT = Path('D:/SelfAgent/work/organ-codex/build/logic.json')
 
 
 def function_bodies(src):

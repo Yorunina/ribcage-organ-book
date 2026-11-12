@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '10';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '11';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
