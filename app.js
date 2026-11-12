@@ -1,7 +1,7 @@
 'use strict';
 
 const state = {
-  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, atlas: { cols: 20, rows: 16, map: {} },
+  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, bonds: [], atlas: { cols: 20, rows: 16, map: {} },
   organById: new Map(),
   filters: { q: '', group: '', rank: '', event: '', score: '' },
   cavityId: 'kubejs:player_17',
@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '11';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '12';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -68,9 +68,9 @@ function icon(id, size) {
 /* ---------- 数据加载 ---------- */
 async function boot() {
   const load = (f) => fetch(`./data/${f}?v=${DATA_V}`, { cache: 'no-cache' }).then((r) => r.json());
-  const [organs, scores, cavities, invTypes, events, atlas] = await Promise.all([
+  const [organs, scores, cavities, invTypes, events, bonds, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
-    load('inventory_types.json'), load('events.json'), load('atlas.json'),
+    load('inventory_types.json'), load('events.json'), load('bonds.json'), load('atlas.json'),
   ]);
   state.atlas = atlas;
   state.organs = organs;
@@ -78,11 +78,13 @@ async function boot() {
   state.cavities = cavities;
   state.invTypes = invTypes;
   state.events = events;
+  state.bonds = bonds;
   organs.forEach((o) => state.organById.set(o.id, o));
 
   initTabs();
   initCodex();
   initBuilder();
+  initBonds();
 }
 
 function initTabs() {
@@ -199,6 +201,39 @@ function showDetail(id) {
   `;
   boxes.querySelector('.close').addEventListener('click', () => boxes.classList.remove('open'));
   boxes.classList.add('open');
+}
+
+/* ---------- 羁绊 ---------- */
+function initBonds() {
+  const el = $('#bonds');
+  $('#bondCount').textContent = `${state.bonds.length} 组羁绊`;
+  el.innerHTML = state.bonds.map((b) => {
+    const steps = b.thresholds.length
+      ? b.thresholds.map((t) =>
+          `<li><span class="step-n">${t.count} 件</span><span class="step-t">${esc(t.text.replace(/^（\d+）/, ''))}</span></li>`).join('')
+      : '<li><span class="step-t muted">该羁绊暂无文字说明</span></li>';
+    const organs = b.organs.map((id) =>
+      `<button class="bond-organ" data-id="${id}" title="${esc(state.organById.get(id)?.name || id)}">${icon(id, 24)}</button>`).join('');
+    return `<article class="bond">
+      <div class="bond-head">
+        <h3>${esc(b.name)}</h3>
+        <span class="bond-tag">${esc(b.tag)}</span>
+        <span class="bond-count">${b.organs.length} 件器官</span>
+      </div>
+      <div class="bond-events">触发：${b.events.map(esc).join(' · ')}</div>
+      <ul class="bond-steps">${steps}</ul>
+      <div class="bond-organs">${organs}</div>
+    </article>`;
+  }).join('');
+
+  el.addEventListener('click', (e) => {
+    const btn = e.target.closest('.bond-organ');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const tab = $$('.tab').find((t) => t.dataset.view === 'codex');
+    if (tab) tab.click();
+    showDetail(id);
+  });
 }
 
 /* ---------- 构筑 ---------- */

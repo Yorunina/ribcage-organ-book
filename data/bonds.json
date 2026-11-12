@@ -1,0 +1,591 @@
+[
+ {
+  "tag": "kubejs:infected",
+  "name": "感染",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 2,
+    "text": "（2）最大生命值 -50%"
+   },
+   {
+    "count": 5,
+    "text": "（5）不再降低最大生命值"
+   },
+   {
+    "count": 9,
+    "text": "（9）将自己的最大生命值叠加到攻击力面板"
+   }
+  ],
+  "organs": [
+   "kubejs:bone_cage",
+   "kubejs:deserted_gula_worm_nest",
+   "kubejs:devour_teeth",
+   "kubejs:flaming_bone_cage",
+   "kubejs:freezing_bone_cage",
+   "kubejs:gula_worm_nest",
+   "kubejs:heart_of_mercy",
+   "kubejs:malignant_cavity_flesh",
+   "kubejs:malignant_neuron_tumor",
+   "kubejs:mutation_intestine",
+   "kubejs:nightmare_core",
+   "kubejs:rosy_tumor",
+   "kubejs:rotten_appendix",
+   "kubejs:rotten_heart",
+   "kubejs:rotten_intestine",
+   "kubejs:rotten_kidney",
+   "kubejs:rotten_liver",
+   "kubejs:rotten_lung",
+   "kubejs:rotten_muscle",
+   "kubejs:rotten_rib",
+   "kubejs:rotten_spine",
+   "kubejs:rotten_spleen",
+   "kubejs:rotten_stomach",
+   "kubejs:soul_core",
+   "kubejs:tumor",
+   "kubejs:unformed_tumor",
+   "kubejs:wither_bone_cage",
+   "kubejs:worm_neuron",
+   "kubejs:worm_of_gula",
+   "kubejs:worm_of_taste"
+  ]
+ },
+ {
+  "tag": "kubejs:nether",
+  "name": "下界",
+  "events": [
+   "胸腔变化时",
+   "获得状态效果时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）玩家不再受凋零效果影响"
+   },
+   {
+    "count": 6,
+    "text": "（6）玩家不再受缓慢效果影响"
+   }
+  ],
+  "organs": [
+   "kubejs:ancient_immortal_volcanic_crystal",
+   "kubejs:ancient_netherite_muscle",
+   "kubejs:blaze_spine",
+   "kubejs:broken_netherite_muscle",
+   "kubejs:explosion_cavity",
+   "kubejs:fireproof_appendix",
+   "kubejs:fireproof_heart",
+   "kubejs:fireproof_intestine",
+   "kubejs:fireproof_kidney",
+   "kubejs:fireproof_liver",
+   "kubejs:fireproof_lung",
+   "kubejs:fireproof_muscle",
+   "kubejs:fireproof_rib",
+   "kubejs:fireproof_spine",
+   "kubejs:fireproof_spleen",
+   "kubejs:fireproof_stomach",
+   "kubejs:ghast_sac",
+   "kubejs:golden_stone",
+   "kubejs:hoglin_rumen",
+   "kubejs:ignited_armour",
+   "kubejs:immortal_volcanic_crystal",
+   "kubejs:immortal_volcanic_rock",
+   "kubejs:magam_colloid",
+   "kubejs:netherite_muscle"
+  ]
+ },
+ {
+  "tag": "kubejs:machine",
+  "name": "机械",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）神经效率若低于1则设为1"
+   },
+   {
+    "count": 6,
+    "text": "（6）健康若低于1则设为1"
+   }
+  ],
+  "organs": [
+   "kubejs:ancient_harbinger_lung",
+   "kubejs:blaze_pressurizer",
+   "kubejs:blood_crystal_factory",
+   "kubejs:bridge_mod",
+   "kubejs:burning_heart",
+   "kubejs:cyborgization_device",
+   "kubejs:damage_mod",
+   "kubejs:energy_bottle_red",
+   "kubejs:fiery_core",
+   "kubejs:furnace_core",
+   "kubejs:golem_cable",
+   "kubejs:golem_plating",
+   "kubejs:harbinger_lung",
+   "kubejs:inner_furnace",
+   "kubejs:iron_repair_device",
+   "kubejs:lava_life_cycle_system",
+   "kubejs:machine_witch_fibroma",
+   "kubejs:mechanized_belt",
+   "kubejs:piston_muscle",
+   "kubejs:pressurized_arm",
+   "kubejs:programmable_automatic_core",
+   "kubejs:prowler_rotating_shaft",
+   "kubejs:pure_color_reaction",
+   "kubejs:purgatory",
+   "kubejs:revolution_bell",
+   "kubejs:revolution_cable",
+   "kubejs:revolution_delay",
+   "kubejs:revolution_relay",
+   "kubejs:small_acid_tank",
+   "kubejs:sturdy_harbinger_lung",
+   "kubejs:telescopic_arm",
+   "kubejs:telescopic_attack_arm",
+   "kubejs:thermometer",
+   "kubejs:watcher_probe"
+  ]
+ },
+ {
+  "tag": "kubejs:plant",
+  "name": "植物",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）每点光合作用会额外提供3%攻击力"
+   },
+   {
+    "count": 6,
+    "text": "（6）每点光合作用会额外提供3%最大生命值"
+   },
+   {
+    "count": 9,
+    "text": "（9）每个植物标签都会提供额外1点光合作用"
+   }
+  ],
+  "organs": [
+   "kubejs:cherry_bone",
+   "kubejs:crimson_brain",
+   "kubejs:crimson_rib",
+   "kubejs:foliaath_stem",
+   "kubejs:lily_pad_lung",
+   "kubejs:pitcher_stomach",
+   "kubejs:rootling_ectoplasm",
+   "kubejs:tentacles_harvester",
+   "kubejs:twisting_weeping_intestine",
+   "kubejs:vita_berry",
+   "kubejs:vita_rose_liver",
+   "kubejs:vita_sunflower"
+  ]
+ },
+ {
+  "tag": "kubejs:nature",
+  "name": "自然",
+  "events": [
+   "胸腔变化时",
+   "获得状态效果时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）玩家不再受中毒效果影响"
+   },
+   {
+    "count": 6,
+    "text": "（6）玩家不再受饥饿效果影响"
+   }
+  ],
+  "organs": [
+   "kubejs:allay_wing",
+   "kubejs:animal_appendix",
+   "kubejs:animal_heart",
+   "kubejs:animal_intestine",
+   "kubejs:animal_kidney",
+   "kubejs:animal_liver",
+   "kubejs:animal_lung",
+   "kubejs:animal_muscle",
+   "kubejs:animal_rib",
+   "kubejs:animal_spine",
+   "kubejs:animal_spleen",
+   "kubejs:animal_stomach",
+   "kubejs:appendix",
+   "kubejs:armadillo_shell",
+   "kubejs:axolotl_gill",
+   "kubejs:bat_throat",
+   "kubejs:bear_paw",
+   "kubejs:bee_honey_stomach",
+   "kubejs:bison_horn",
+   "kubejs:boar_nose",
+   "kubejs:camel_hump",
+   "kubejs:cassowary_muscle",
+   "kubejs:chimera_heart",
+   "kubejs:chop_rib",
+   "kubejs:cindaria_umbrella",
+   "kubejs:deer_horn",
+   "kubejs:dog_tail",
+   "kubejs:dolphin_fin",
+   "kubejs:dragonfly_wing",
+   "kubejs:dumbo_octopus_hat",
+   "kubejs:elder_guardian_core",
+   "kubejs:ferret_tail",
+   "kubejs:flamingo_beak",
+   "kubejs:fox_tail",
+   "kubejs:frog_tongue",
+   "kubejs:giant_claw",
+   "kubejs:gills",
+   "kubejs:glow_gland",
+   "kubejs:guardian_core",
+   "kubejs:hatching_chamber",
+   "kubejs:heart",
+   "kubejs:hedgehog_thorn",
+   "kubejs:horse_tendon",
+   "kubejs:insect_caeca",
+   "kubejs:insect_heart",
+   "kubejs:insect_intestine",
+   "kubejs:insect_lung",
+   "kubejs:insect_muscle",
+   "kubejs:insect_stomach",
+   "kubejs:intestine",
+   "kubejs:jumping_spider_leg",
+   "kubejs:kidney",
+   "kubejs:koi_fish_scale",
+   "kubejs:ladybug_wing",
+   "kubejs:leaf_insect_exoskeleton",
+   "kubejs:leech_mouthpart",
+   "kubejs:liver",
+   "kubejs:llama_gland",
+   "kubejs:lung",
+   "kubejs:mammary_gland",
+   "kubejs:minisheep_gland",
+   "kubejs:moew_nose",
+   "kubejs:muscle",
+   "kubejs:otter_tooth",
+   "kubejs:owl_vertebrae",
+   "kubejs:pelican_larynx",
+   "kubejs:penguin_flipper",
+   "kubejs:pig_stomach",
+   "kubejs:pillager_gland",
+   "kubejs:pirate_eye",
+   "kubejs:pufferfish_liver",
+   "kubejs:pumpkin_shooter",
+   "kubejs:rabbit_foot",
+   "kubejs:raccoon_paw",
+   "kubejs:rat_ear",
+   "kubejs:ravager_hoof",
+   "kubejs:red_panda_tail",
+   "kubejs:red_wolf_beard",
+   "kubejs:refill_agreement",
+   "kubejs:rib",
+   "kubejs:rib_blade",
+   "kubejs:rocky_kidney",
+   "kubejs:roly_poly_shell",
+   "kubejs:rumen",
+   "kubejs:sea_bunny_skin",
+   "kubejs:shima_enaga_feather",
+   "kubejs:silverfish_gland",
+   "kubejs:slime_colloid",
+   "kubejs:snail_shell",
+   "kubejs:spider_leg",
+   "kubejs:spine",
+   "kubejs:spleen",
+   "kubejs:squirrel_tail",
+   "kubejs:stag_beetle_mandibles",
+   "kubejs:stick_bug_exoskeleton",
+   "kubejs:stomach",
+   "kubejs:sulfur_cube_colloid",
+   "kubejs:swim_bladder",
+   "kubejs:symbiocto_arm",
+   "kubejs:symbiocto_arm",
+   "kubejs:turkey_gizzard",
+   "kubejs:turtle_shell",
+   "kubejs:urchinkin_stinger",
+   "kubejs:weevil_mouth",
+   "kubejs:wilden_heart",
+   "kubejs:wolf_fang"
+  ]
+ },
+ {
+  "tag": "kubejs:revolution",
+  "name": "革命",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）力量属性现在额外提供5%致命伤害"
+   },
+   {
+    "count": 6,
+    "text": "（6）防御属性现在额外提供1%致命几率"
+   }
+  ],
+  "organs": [
+   "kubejs:mechanized_belt",
+   "kubejs:revolution_bell",
+   "kubejs:revolution_cable",
+   "kubejs:revolution_delay",
+   "kubejs:revolution_relay"
+  ]
+ },
+ {
+  "tag": "kubejs:food",
+  "name": "食物",
+  "events": [
+   "食用食物时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）食用食物时会获得半分钟美餐效果"
+   },
+   {
+    "count": 6,
+    "text": "（6）食用食物时会获得半分钟农夫的祝福效果"
+   }
+  ],
+  "organs": [
+   "kubejs:baguette_bone",
+   "kubejs:beer_gland",
+   "kubejs:deserted_gula_worm_nest",
+   "kubejs:gluten_muscle",
+   "kubejs:greedy_throat",
+   "kubejs:gula_belt",
+   "kubejs:gula_worm_nest",
+   "kubejs:honeyed_stress",
+   "kubejs:king_of_stomach",
+   "kubejs:living_beef_wellington",
+   "kubejs:mashed_potato_pancreas",
+   "kubejs:parasitism_stomach",
+   "kubejs:sweet_heart",
+   "kubejs:sweets_gland",
+   "kubejs:tasty_gland",
+   "kubejs:worm_larva",
+   "kubejs:worm_of_gula",
+   "kubejs:worm_of_taste"
+  ]
+ },
+ {
+  "tag": "kubejs:magic",
+  "name": "魔法",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）最大法力值 +100"
+   },
+   {
+    "count": 6,
+    "text": "（6）最大法力值 +300"
+   }
+  ],
+  "organs": [
+   "kubejs:abnormal_sand_gland",
+   "kubejs:amethyst_core",
+   "kubejs:ancient_cold_armor_plate",
+   "kubejs:ancient_eternal_cold_crystal",
+   "kubejs:ancient_heart",
+   "kubejs:ancient_infernal_dragon_crystal",
+   "kubejs:ancient_kraken_eye",
+   "kubejs:ancient_leviathan_rib",
+   "kubejs:ancient_maledictus_wing",
+   "kubejs:ancient_poison_sand_gland",
+   "kubejs:ancient_underworld_knight_bone",
+   "kubejs:animted_soul",
+   "kubejs:aptrgangr_soul",
+   "kubejs:awaken_heart",
+   "kubejs:bookwyrm_star_gem",
+   "kubejs:calamity_bone_spur",
+   "kubejs:cold_armor_plate",
+   "kubejs:cold_crystal",
+   "kubejs:coral_armor",
+   "kubejs:corroded_leviathan_rib",
+   "kubejs:decayed_infernal_dragon_crystal",
+   "kubejs:deepling_ectoplasm",
+   "kubejs:deepling_star_gem",
+   "kubejs:draugr_skull",
+   "kubejs:drygmy_star_gem",
+   "kubejs:dying_heart",
+   "kubejs:eternal_cold_crystal",
+   "kubejs:exhausted_source_focus_crystal",
+   "kubejs:heal_star_gem",
+   "kubejs:hippocamtus_scale",
+   "kubejs:infernal_dragon_crystal",
+   "kubejs:koboleton_coccyx",
+   "kubejs:koboleton_rib",
+   "kubejs:koboleton_spine",
+   "kubejs:kraken_cloudy_eye",
+   "kubejs:kraken_eye",
+   "kubejs:leviathan_rib",
+   "kubejs:maledictus_wing",
+   "kubejs:poison_sand_gland",
+   "kubejs:potion_skin",
+   "kubejs:remnant_heart",
+   "kubejs:shining_cold_armor_plate",
+   "kubejs:shulker_eye",
+   "kubejs:soul_cage",
+   "kubejs:soul_wing",
+   "kubejs:starbuncle_star_gem",
+   "kubejs:underworld_knight_bone",
+   "kubejs:underworld_knight_debris",
+   "kubejs:whirlisprig_star_gem",
+   "kubejs:worn_maledictus_wing"
+  ]
+ },
+ {
+  "tag": "kubejs:factory",
+  "name": "工厂",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 4,
+    "text": "（4）肺活量和呼吸效率若低于2则设为2"
+   },
+   {
+    "count": 8,
+    "text": "（8）血液过滤效率若低于2则设为2"
+   }
+  ],
+  "organs": [
+   "kubejs:belt_connecter",
+   "kubejs:gula_belt",
+   "kubejs:honeyed_stress",
+   "kubejs:mechanical_mixer",
+   "kubejs:mechanical_press",
+   "kubejs:mechanical_saw",
+   "kubejs:mechanized_belt",
+   "kubejs:purgatory",
+   "kubejs:recovery_spleen",
+   "kubejs:water_wheel",
+   "kubejs:windmill_bearing",
+   "kubejs:wrench_muscle"
+  ]
+ },
+ {
+  "tag": "kubejs:relics",
+  "name": "遗物",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 4,
+    "text": "（4）攻击力 -50%"
+   },
+   {
+    "count": 5,
+    "text": "（5）最大生命值 -50%"
+   },
+   {
+    "count": 10,
+    "text": "（10）将上述降低效果扭转为增加"
+   }
+  ],
+  "organs": [
+   "kubejs:abnormal_sand_gland",
+   "kubejs:ancient_cold_armor_plate",
+   "kubejs:ancient_eternal_cold_crystal",
+   "kubejs:ancient_harbinger_lung",
+   "kubejs:ancient_heart",
+   "kubejs:ancient_immortal_volcanic_crystal",
+   "kubejs:ancient_infernal_dragon_crystal",
+   "kubejs:ancient_kraken_eye",
+   "kubejs:ancient_leviathan_rib",
+   "kubejs:ancient_maledictus_wing",
+   "kubejs:ancient_netherite_muscle",
+   "kubejs:ancient_poison_sand_gland",
+   "kubejs:ancient_underworld_knight_bone",
+   "kubejs:awaken_heart",
+   "kubejs:broken_netherite_muscle",
+   "kubejs:cold_armor_plate",
+   "kubejs:cold_crystal",
+   "kubejs:corroded_leviathan_rib",
+   "kubejs:decayed_infernal_dragon_crystal",
+   "kubejs:dying_heart",
+   "kubejs:ender_guardian_spine",
+   "kubejs:eternal_cold_crystal",
+   "kubejs:harbinger_lung",
+   "kubejs:immortal_volcanic_crystal",
+   "kubejs:immortal_volcanic_rock",
+   "kubejs:infernal_dragon_crystal",
+   "kubejs:kraken_cloudy_eye",
+   "kubejs:kraken_eye",
+   "kubejs:leviathan_rib",
+   "kubejs:maledictus_wing",
+   "kubejs:netherite_muscle",
+   "kubejs:poison_sand_gland",
+   "kubejs:remnant_heart",
+   "kubejs:shining_cold_armor_plate",
+   "kubejs:sturdy_harbinger_lung",
+   "kubejs:twinkle_rib",
+   "kubejs:underworld_knight_bone",
+   "kubejs:underworld_knight_debris",
+   "kubejs:warden_core",
+   "kubejs:wither_skull",
+   "kubejs:worn_maledictus_wing"
+  ]
+ },
+ {
+  "tag": "kubejs:ender",
+  "name": "末影",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 6,
+    "text": "（6）攻击闪避 +30"
+   }
+  ],
+  "organs": [
+   "kubejs:dragon_blood_heart",
+   "kubejs:dragon_blood_intestine",
+   "kubejs:dragon_blood_kidney",
+   "kubejs:dragon_blood_liver",
+   "kubejs:dragon_blood_lung",
+   "kubejs:dragon_blood_muscle",
+   "kubejs:dragon_blood_rib",
+   "kubejs:dragon_blood_spine",
+   "kubejs:dragon_blood_stomach",
+   "kubejs:ender_breath",
+   "kubejs:ender_ectoplasm",
+   "kubejs:ender_eye",
+   "kubejs:ender_golem_line",
+   "kubejs:ender_guardian_spine",
+   "kubejs:endermaptera_shell",
+   "kubejs:endermite_gland",
+   "kubejs:phantom_wing"
+  ]
+ },
+ {
+  "tag": "kubejs:rose",
+  "name": "玫瑰",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 8,
+    "text": "（8）玫瑰化会提供额外3%攻击力和3%最大生命值"
+   }
+  ],
+  "organs": [
+   "kubejs:rose_quartz_dialyzer",
+   "kubejs:rose_quartz_heart",
+   "kubejs:rose_quartz_liver",
+   "kubejs:rose_quartz_muscle",
+   "kubejs:rose_quartz_rib",
+   "kubejs:rosy_tumor"
+  ]
+ }
+]

@@ -189,6 +189,28 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 .picker .card{padding:6px}
 .picker .card img{width:26px;height:26px;flex:0 0 26px}
 
+/* ---------- 羁绊 ---------- */
+.bonds{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.bond{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:12px 14px;
+}
+.bond-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.bond-head h3{margin:0;font-size:14px;font-weight:600;color:#fff}
+.bond-tag{font-size:10px;color:var(--muted);padding:1px 6px;border:1px solid var(--line-hi);border-radius:10px}
+.bond-count{margin-left:auto;font-size:11px;color:var(--accent)}
+.bond-events{font-size:11px;color:var(--muted);margin-bottom:8px}
+.bond-steps{list-style:none;margin:0 0 10px;padding:0;border-top:1px solid var(--line)}
+.bond-steps li{display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px}
+.step-n{flex:0 0 46px;font-size:11px;color:var(--accent);font-variant-numeric:tabular-nums}
+.step-t{flex:1 1 auto;line-height:1.5}
+.bond-organs{display:flex;flex-wrap:wrap;gap:3px;max-height:96px;overflow:auto}
+.bond-organ{
+  padding:2px;border:1px solid transparent;border-radius:2px;line-height:0;
+}
+.bond-organ:hover{border-color:var(--accent);background:var(--panel-2)}
+.bond-organ .ico{display:block}
+
 @media (max-width:900px){
   .split,.builder{grid-template-columns:1fr}
   .detail{left:12px;right:12px;width:auto}

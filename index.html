@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RibCage 器官图鉴</title>
 <link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=11">
-<link rel="stylesheet" href="./style.css?v=11">
+<link rel="stylesheet" href="./style.css?v=12">
 </head>
 <body>
 <header class="top">
@@ -13,6 +13,7 @@
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-view="codex" aria-selected="true">图鉴</button>
     <button class="tab" role="tab" data-view="builder" aria-selected="false">构筑</button>
+    <button class="tab" role="tab" data-view="bonds" aria-selected="false">羁绊</button>
   </nav>
 </header>
 
@@ -73,6 +74,12 @@
         </div>
       </aside>
     </div>
+  </section>
+
+  <!-- 羁绊 -->
+  <section class="view" id="view-bonds">
+    <div class="resultbar"><span id="bondCount">—</span><span>·</span><span class="muted">按器官标签件数生效的组合效果</span></div>
+    <div class="bonds" id="bonds"></div>
   </section>
 
 </main>
