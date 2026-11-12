@@ -1,7 +1,7 @@
 'use strict';
 
 const state = {
-  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, bonds: [], atlas: { cols: 20, rows: 16, map: {} },
+  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, bonds: [], bondTags: new Map(), atlas: { cols: 20, rows: 16, map: {} },
   organById: new Map(),
   filters: { q: '', group: '', rank: '', event: '', score: '' },
   cavityId: 'kubejs:player_17',
@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '13';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '14';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -79,6 +79,11 @@ async function boot() {
   state.invTypes = invTypes;
   state.events = events;
   state.bonds = bonds;
+  state.bondTags = new Map();
+  bonds.forEach((b) => b.organs.forEach((id) => {
+    if (!state.bondTags.has(id)) state.bondTags.set(id, []);
+    state.bondTags.get(id).push(b.tag);
+  }));
   organs.forEach((o) => state.organById.set(o.id, o));
 
   initTabs();
@@ -390,6 +395,42 @@ function renderTotals() {
   const filled = Object.keys(state.build).length;
   $('#totals').innerHTML = (filled ? `<div class="total-row"><span class="muted">已放器官</span><span>${filled}</span></div>` : '') +
     (rows || '<span class="hint">尚未放入器官</span>');
+  renderSpecial();
+  renderBondEffects();
+}
+
+function placedOrgans() {
+  const seen = new Set();
+  return Object.values(state.build).map((id) => state.organById.get(id))
+    .filter((o) => o && !seen.has(o.id) && seen.add(o.id));
+}
+
+function renderSpecial() {
+  const lines = [];
+  placedOrgans().forEach((o) => {
+    const fx = (o.effectsResolved && o.effectsResolved.length ? o.effectsResolved : o.effects) || [];
+    if (!fx.length) return;
+    const text = fx.map((t) => t.trim()).filter(Boolean).join('<br>');
+    lines.push(`<div class="fx-row"><span class="fx-name">${esc(o.name)}</span><span class="fx-text">${colorize(text)}</span></div>`);
+  });
+  $('#special').innerHTML = lines.length ? lines.join('') : '<span class="hint">所选器官没有特殊效果</span>';
+}
+
+function renderBondEffects() {
+  const counts = {};
+  placedOrgans().forEach((o) => {
+    (state.bondTags.get(o.id) || []).forEach((tag) => { counts[tag] = (counts[tag] || 0) + 1; });
+  });
+  const blocks = [];
+  state.bonds.forEach((b) => {
+    const n = counts[b.tag] || 0;
+    if (!n) return;
+    const hit = b.thresholds.filter((t) => n >= t.count);
+    if (!hit.length) return;
+    const steps = hit.map((t) => `<li><span class="step-n">${t.count} 件</span><span class="step-t">${esc(t.text.replace(/^（\d+）/, ''))}</span></li>`).join('');
+    blocks.push(`<div class="fx-row"><div class="fx-name">${esc(b.name)} · ${n} 件</div><ul class="bond-steps">${steps}</ul></div>`);
+  });
+  $('#bondfx').innerHTML = blocks.length ? blocks.join('') : '<span class="hint">尚未触发羁绊</span>';
 }
 
 const round = (v) => Math.round(v * 100) / 100;

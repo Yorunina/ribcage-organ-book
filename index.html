@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RibCage 器官图鉴</title>
-<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=13">
-<link rel="stylesheet" href="./style.css?v=13">
+<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=14">
+<link rel="stylesheet" href="./style.css?v=14">
 </head>
 <body>
 <header class="top">
@@ -65,6 +65,14 @@
           <div class="totals" id="totals"><span class="hint">尚未放入器官</span></div>
         </div>
         <div class="panel">
+          <h3>特殊效果</h3>
+          <div class="fx" id="special"><span class="hint">尚未放入器官</span></div>
+        </div>
+        <div class="panel">
+          <h3>羁绊效果</h3>
+          <div class="fx" id="bondfx"><span class="hint">尚未触发羁绊</span></div>
+        </div>
+        <div class="panel">
           <h3>分享码</h3>
           <div class="row" style="margin-bottom:8px">
             <button class="btn primary" id="exportBtn">导出</button>
@@ -93,6 +101,6 @@
   <div class="list" id="pickList"></div>
 </div></div>
 
-<script src="./app.js?v=13"></script>
+<script src="./app.js?v=14"></script>
 </body>
 </html>
