@@ -1,1 +1,125 @@
-<!doctype html><meta charset="utf-8"><title>RibCage 器官图鉴</title><p>建设中</p>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RibCage 器官图鉴</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>RibCage 器官图鉴</b><span>No Flesh Within Chest 2</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="codex" aria-selected="true">图鉴</button>
+    <button class="tab" role="tab" data-view="builder" aria-selected="false">构筑</button>
+    <button class="tab" role="tab" data-view="events" aria-selected="false">事件测试</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <!-- 图鉴 -->
+  <section class="view active" id="view-codex">
+    <div class="split">
+      <aside class="panel">
+        <h3>筛选</h3>
+        <label class="field"><span>搜索</span>
+          <input type="search" id="q" placeholder="名称 / id / 效果文本">
+        </label>
+        <div class="field"><span>分类</span><div class="chips" id="groups"></div></div>
+        <div class="field"><span>触发事件</span>
+          <select id="eventFilter"><option value="">全部</option></select>
+        </div>
+        <div class="field"><span>稀有度</span><div class="chips" id="ranks"></div></div>
+        <div class="field"><span>属性</span>
+          <select id="scoreFilter"><option value="">全部</option></select>
+        </div>
+        <div class="hint">数据由整合包脚本与语言文件生成，tooltip 为静态文本还原。</div>
+      </aside>
+      <div>
+        <div class="resultbar"><span id="count">—</span><span>·</span><span class="muted">点击查看 tooltip</span></div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 构筑 -->
+  <section class="view" id="view-builder">
+    <div class="builder">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;align-items:end;margin-bottom:12px">
+          <label class="field" style="margin:0;flex:1 1 260px"><span>胸腔类型</span>
+            <select id="cavitySelect"></select>
+          </label>
+          <div class="row">
+            <button class="btn" id="fillDefault">填入默认器官</button>
+            <button class="btn" id="clearBuild">清空</button>
+          </div>
+        </div>
+        <div class="cavity"><div class="slotgrid" id="slotgrid"></div></div>
+        <p class="hint" id="cavityHint"></p>
+      </div>
+      <aside style="display:grid;gap:14px">
+        <div class="panel">
+          <h3>属性合计</h3>
+          <div class="totals" id="totals"><span class="hint">尚未放入器官</span></div>
+        </div>
+        <div class="panel">
+          <h3>分享码</h3>
+          <div class="row" style="margin-bottom:8px">
+            <button class="btn primary" id="exportBtn">导出</button>
+            <button class="btn" id="importBtn">导入</button>
+          </div>
+          <textarea id="share" rows="3" placeholder="分享码会显示在这里，或粘贴分享码后点导入"></textarea>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 事件测试 -->
+  <section class="view" id="view-events">
+    <div class="builder">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;align-items:end;margin-bottom:8px">
+          <label class="field" style="margin:0;flex:1 1 240px"><span>伪造事件</span>
+            <select id="eventSelect"></select>
+          </label>
+          <label class="field" style="margin:0;flex:0 1 180px"><span>事件数值</span>
+            <input type="text" id="eventAmount" value="6">
+          </label>
+        </div>
+        <p class="hint" id="eventHint"></p>
+        <div class="chain" id="chain"></div>
+      </div>
+      <aside style="display:grid;gap:14px">
+        <div class="panel">
+          <h3>当前构筑</h3>
+          <div class="kv" id="buildInfo"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="demoBuild">载入示例构筑</button>
+            <button class="btn" id="gotoBuilder">去构筑页</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>推演说明</h3>
+          <p class="hint">
+            顺序按胸腔槽位排列，效果文本来自器官 tooltip，其中 %s 是游戏内运行时填充的数值占位。
+            面板数值为按器官分数线性推演的近似值，不等同游戏内实际结果。
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<div class="detail" id="detail"></div>
+<div class="picker" id="picker"><div class="box">
+  <div class="row" style="justify-content:space-between">
+    <input type="search" id="pickQ" placeholder="搜索器官…">
+    <button class="btn" id="pickClear">移除</button>
+  </div>
+  <div class="list" id="pickList"></div>
+</div></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
