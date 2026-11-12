@@ -31,7 +31,11 @@ No Flesh Within Chest 2 的器官静态站，纯前端（原生 HTML/CSS/JS）�
 python build/extract_organs.py          # 需要先设置脚本顶部的 PACK 路径
 ```
 
-脚本会输出 `site/data/*.json`，材质需一并复制到 `site/mc/`（脚本不处理材质拷贝）。
+```bash
+python build/build_atlas.py             # 把所有器官材质打成一张图集 site/mc/atlas.png
+```
+
+材质以图集形式提供：319 个 16×16 器官图标合成单张 320×256 PNG，页面用背景定位显示，只需一次请求。
 
 ## 本地预览
 

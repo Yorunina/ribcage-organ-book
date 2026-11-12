@@ -1,7 +1,7 @@
 'use strict';
 
 const state = {
-  organs: [], scores: {}, cavities: [], invTypes: {}, events: {},
+  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, atlas: { cols: 20, rows: 16, map: {} },
   organById: new Map(),
   filters: { q: '', group: '', rank: '', event: '', score: '' },
   cavityId: 'kubejs:player',
@@ -55,13 +55,22 @@ function colorize(text) {
   return out.join('');
 }
 
+function icon(id, size) {
+  const pos = state.atlas.map[id];
+  if (!pos) return `<i class="ico" style="width:${size}px;height:${size}px"></i>`;
+  const scale = state.atlas.cols * size;
+  return `<i class="ico" style="width:${size}px;height:${size}px;` +
+    `background-size:${scale}px auto;background-position:${-pos[0] * size}px ${-pos[1] * size}px"></i>`;
+}
+
 /* ---------- 数据加载 ---------- */
 async function boot() {
   const load = (f) => fetch(`./data/${f}`).then((r) => r.json());
-  const [organs, scores, cavities, invTypes, events] = await Promise.all([
+  const [organs, scores, cavities, invTypes, events, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
-    load('inventory_types.json'), load('events.json'),
+    load('inventory_types.json'), load('events.json'), load('atlas.json'),
   ]);
+  state.atlas = atlas;
   state.organs = organs;
   state.scores = scores;
   state.cavities = cavities;
@@ -159,7 +168,7 @@ function renderGrid() {
   $('#count').textContent = `${list.length} 个器官`;
   const html = list.map((o) => `
     <button class="card" data-id="${o.id}">
-      ${o.texture ? `<img src="./${o.texture}" alt="">` : '<span style="width:32px"></span>'}
+      ${icon(o.id, 32)}
       <span><span class="n">${esc(o.name)}</span><span class="g">${GROUPS[o.group] || o.group} · R${o.rank}</span></span>
     </button>`).join('');
   $('#grid').innerHTML = html || '<p class="hint">没有匹配的器官。</p>';
@@ -177,7 +186,7 @@ function showDetail(id) {
     `<span class="tag">${esc(state.events[e.event]?.name || e.event)}${e.mode === 'only' ? ' · 仅' : ''}</span>`).join('');
   boxes.innerHTML = `
     <button class="close" aria-label="关闭">✕</button>
-    <h2 class="mc-name">${esc(o.name)}</h2>
+    <div class="detail-head">${icon(o.id, 40)}<h2 class="mc-name">${esc(o.name)}</h2></div>
     <div class="mc-id">${esc(o.id)}</div>
     ${o.flavor.map((t) => `<div class="mc-line flavor">${colorize(t)}</div>`).join('')}
     ${o.effects.length ? `<div class="mc-sep"></div>${o.effects.map((t) => `<div class="mc-line">${colorize(t)}</div>`).join('')}` : ''}
@@ -295,7 +304,7 @@ function renderSlots() {
     const o = organId ? state.organById.get(organId) : null;
     const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`;
     return `<div class="slot ${o ? '' : 'empty'}" data-i="${i}" style="${style}" title="${o ? esc(o.name) : '空槽位'}">
-      ${o && o.texture ? `<img src="./${o.texture}" alt="">` : ''}
+      ${o ? icon(o.id, size - 8) : ''}
       ${s.type ? `<span class="st">${esc(s.type.split('_')[0])}</span>` : ''}
     </div>`;
   }).join('');
@@ -351,7 +360,7 @@ function renderPickList() {
     (o.name + o.path).toLowerCase().includes(q)).slice(0, 120);
   $('#pickList').innerHTML = list.map((o) => `
     <button class="card" data-id="${o.id}">
-      ${o.texture ? `<img src="./${o.texture}" alt="">` : ''}
+      ${icon(o.id, 26)}
       <span><span class="n">${esc(o.name)}</span><span class="g">${GROUPS[o.group] || o.group}</span></span>
     </button>`).join('');
 }
