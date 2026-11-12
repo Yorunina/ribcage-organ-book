@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '9';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '10';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -83,7 +83,6 @@ async function boot() {
   initTabs();
   initCodex();
   initBuilder();
-  initEvents();
 }
 
 function initTabs() {
@@ -381,99 +380,6 @@ function renderPickList() {
       ${icon(o.id, 26)}
       <span><span class="n">${esc(o.name)}</span><span class="g">${GROUPS[o.group] || o.group}</span></span>
     </button>`).join('');
-}
-
-/* ---------- 事件测试 ---------- */
-const DAMAGE_EVENTS = new Set(['entity_do_damage', 'entity_be_hurt', 'entity_fall']);
-
-function initEvents() {
-  const evs = Object.entries(state.events).sort((a, b) => b[1].organs.length - a[1].organs.length);
-  $('#eventSelect').innerHTML = evs.map(([k, v]) =>
-    `<option value="${k}">${esc(v.name)} · ${v.organs.length}</option>`).join('');
-  $('#eventSelect').addEventListener('change', runEvent);
-  $('#eventAmount').addEventListener('input', runEvent);
-  $('#gotoBuilder').addEventListener('click', () => {
-    switchView('builder');
-  });
-  $('#demoBuild').addEventListener('click', () => {
-    const ev = $('#eventSelect').value;
-    const pool = (state.events[ev]?.organs || []).map((id) => state.organById.get(id)).filter(Boolean);
-    if (!pool.length) return;
-    const it = cavity();
-    const slotCount = it ? it.slots.length : 0;
-    state.build = {};
-    const picks = pool.slice().sort((a, b) => b.rank - a.rank).slice(0, Math.min(slotCount, 8));
-    picks.forEach((o, i) => { state.build[i] = o.id; });
-    runEvent();
-  });
-  runEvent();
-}
-
-function switchView(name) {
-  $$('.tab').forEach((x) => x.setAttribute('aria-selected', String(x.dataset.view === name)));
-  $$('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${name}`));
-  if (name !== 'codex') $('#detail').classList.remove('open');
-}
-
-function buildScoreSummary() {
-  const c = cavity();
-  const acc = {};
-  (c.baseScores || []).forEach((s) => { acc[s.id] = (acc[s.id] || 0) + Number(s.value); });
-  Object.values(state.build).forEach((id) => {
-    const o = state.organById.get(id);
-    if (!o) return;
-    Object.entries(o.scores).forEach(([k, v]) => { acc[k] = (acc[k] || 0) + v; });
-  });
-  return acc;
-}
-
-function runEvent() {
-  const ev = $('#eventSelect').value;
-  const amount = Number($('#eventAmount').value) || 0;
-  const c = cavity();
-  const score = buildScoreSummary();
-
-  const hits = Object.entries(state.build)
-    .map(([i, id]) => ({ slot: Number(i), organ: state.organById.get(id) }))
-    .filter((h) => h.organ && h.organ.events.some((e) => e.event === ev))
-    .sort((a, b) => a.slot - b.slot);
-
-  const relevant = ev === 'entity_do_damage' ? 'chestcavity:strength'
-    : ev === 'entity_be_hurt' ? 'chestcavity:defense'
-    : ev === 'entity_fall' ? 'chestcavity:defense' : null;
-
-  $('#eventHint').innerHTML = hits.length
-    ? `该构筑有 ${hits.length} 个器官响应此事件，按槽位顺序触发。`
-    : '当前构筑没有器官响应此事件，去构筑页放几个器官。';
-
-  $('#chain').innerHTML = hits.map((h, n) => `
-    <div class="hit">
-      <div class="idx">${n + 1}</div>
-      <div>
-        <div><b>${esc(h.organ.name)}</b> <span class="muted">槽位 ${h.slot + 1}</span></div>
-        ${h.organ.effects.length ? (h.organ.effectsResolved || h.organ.effects).map((t) => `<div class="eff"><div class="line">${colorize(t)}</div></div>`).join('') : '<div class="eff muted">（该器官的此事件效果由脚本直接结算，无静态文本）</div>'}
-      </div>
-    </div>`).join('') || '';
-
-  const info = $('#buildInfo');
-  const filled = Object.keys(state.build).length;
-  let html = `<span class="muted">胸腔</span><span>${esc(c.name)}</span>
-    <span class="muted">器官</span><span>${filled}</span>`;
-  if (relevant) {
-    const v = score[relevant] || 0;
-    const est = amount * (1 + v * 0.1);
-    html += `<span class="muted">${esc(state.scores[relevant]?.name || relevant)}</span><span>${round(v)}</span>
-      <span class="muted">事件值</span><span>${amount}</span>`;
-    $('#chain').insertAdjacentHTML('afterbegin', `
-      <div class="hit" style="border-color:var(--accent)">
-        <div class="idx">≈</div>
-        <div>
-          <div class="num">${round(est)}</div>
-          <div class="eff muted">推演示意：${amount} × (1 + ${round(v)} × 0.1)。游戏内数值由各器官脚本结算，此处仅作参考。</div>
-        </div>
-      </div>`);
-  }
-  info.innerHTML = html;
 }
 
 boot();
