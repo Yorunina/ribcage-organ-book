@@ -193,6 +193,7 @@ function showDetail(id) {
     <div class="mc-id">${esc(o.id)}</div>
     ${o.flavor.map((t) => `<div class="mc-line flavor">${colorize(t)}</div>`).join('')}
     ${o.effects.length ? `<div class="mc-sep"></div>${(o.effectsResolved || o.effects).map((t) => `<div class="mc-line">${colorize(t)}</div>`).join('')}` : ''}
+    ${o.slotEffects?.length ? `<div class="mc-sep"></div><div class="mc-line muted">槽位效果</div>${o.slotEffects.map((t) => `<div class="mc-line">${esc(t)}</div>`).join('')}` : ''}
     ${scoreRows ? `<div class="mc-sep"></div>${scoreRows}` : ''}
     ${o.obtain ? `<div class="mc-sep"></div><div class="mc-line muted">${colorize(o.obtain)}</div>` : ''}
     ${evTags ? `<div class="tagline">${evTags}</div>` : ''}
