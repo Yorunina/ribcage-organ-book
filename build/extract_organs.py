@@ -162,14 +162,46 @@ for k, v in lang.items():
         scores.setdefault(sid, {})['name'] = v
 
 # ---------- 胸腔类型与槽位 ----------
+BUNDLE_TEX = PACK / 'kubejs/assets'
+GUI_OUT = OUT.parent / 'mc/gui'
+
+def resolve_bg(tex):
+    """把 kubejs:textures/gui/x.png 解析成包内文件，并复制到站点的 mc/gui/"""
+    if not tex or ':' not in tex:
+        return ''
+    ns, rest = tex.split(':', 1)
+    src = BUNDLE_TEX / ns / rest
+    if not src.exists():
+        alt = Path('D:/hermes-workspace/ribcage-ws/chestcavity/src/main/resources/assets') / ns / rest
+        if not alt.exists():
+            alt = Path('D:/hermes-workspace/ribcage-ws/chestcavity/src/main/resources/assets/chestcavity/textures/gui') / Path(rest).name
+        src = alt if alt.exists() else src
+    if not src.exists():
+        return ''
+    GUI_OUT.mkdir(parents=True, exist_ok=True)
+    dst = GUI_OUT / f'{ns}_{src.stem}.png'
+    if not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
+        dst.write_bytes(src.read_bytes())
+    try:
+        from PIL import Image
+        w, h = Image.open(dst).size
+    except Exception:
+        w = h = 0
+    return f'mc/gui/{dst.name}', w, h
+
 inv_types = {}
 for p in sorted(INV_DIR.glob('*.json')):
     d = json.load(open(p, encoding='utf-8'))
+    size = d.get('backgroundSize') or {'x': 176, 'y': 166}
+    bg_path, bg_w, bg_h = resolve_bg(d.get('backgroundTexture', '')) or ('', 0, 0)
     inv_types['kubejs:' + p.stem] = {
         'id': 'kubejs:' + p.stem,
         'slots': d.get('slotDefinitions', []),
-        'bg': d.get('backgroundTexture', ''),
-        'size': d.get('backgroundSize', {'x': 176, 'y': 166}),
+        'bg': bg_path,
+        'texW': bg_w,
+        'texH': bg_h,
+        'size': size,
+        'playerInv': d.get('playerInventoryPosition') or {'x': 0, 'y': 0},
     }
 
 SPECIAL_CAVITY = {

@@ -17,7 +17,7 @@ No Flesh Within Chest 2 的器官静态站，纯前端（原生 HTML/CSS/JS）�
 | 器官注册、分数、稀有度、可刷出 | `kubejs/server_scripts/domain/organ/organ/**/*.js` 的 `RegistryOrgan(...)` |
 | 器官触发事件 | 同目录 `RegistryOrganStrategy(... .addStrategy/.addOnlyStrategy)` |
 | tooltip 文本 | `kubejs/assets/kubejs/lang/zh_cn.json` |
-| 胸腔类型 / 槽位 | `kubejs/data/kubejs/cc_types`、`cc_inventory_types` |
+| 胸腔类型 / 槽位 / GUI 底图 | `kubejs/data/kubejs/cc_types`、`cc_inventory_types`；底图取自 `kubejs/assets/kubejs/textures/gui/chest_cavity` |
 | 材质 | `kubejs/assets/kubejs/textures/item/organs/**` |
 
 只能近似、不能精确复现的部分：
@@ -36,6 +36,8 @@ python build/build_atlas.py             # 把所有器官材质打成一张图�
 ```
 
 材质以图集形式提供：319 个 16×16 器官图标合成单张 320×256 PNG，页面用背景定位显示，只需一次请求。
+
+胸腔 GUI 底图随提取脚本一起复制到 `site/mc/gui/`。槽位坐标与底图是 1:1 的 GUI 像素，槽位内格 16×16，构筑页按同一比例缩放底图与槽位。
 
 ## 本地预览
 

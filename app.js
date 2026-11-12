@@ -292,19 +292,30 @@ function renderSlots() {
     return;
   }
   const slots = it.slots;
-  const maxX = Math.max(...slots.map((s) => s.x)) + 18;
-  const maxY = Math.max(...slots.map((s) => s.y)) + 18;
-  const k = Math.min(1.9, 560 / maxX);
-  const size = Math.round(18 * k) - 1;
-  grid.style.height = `${Math.round(maxY * k)}px`;
+  const bgW = (it.size && it.size.x) || (Math.max(...slots.map((s) => s.x)) + 18);
+  const bgH = (it.size && it.size.y) || (Math.max(...slots.map((s) => s.y)) + 18);
+  const k = Math.min(2, 620 / bgW);
+  const size = Math.round(16 * k);          // 槽位内格 16×16，与 GUI 底图一一对应
   grid.style.position = 'relative';
+  grid.style.width = `${Math.round(bgW * k)}px`;
+  grid.style.height = `${Math.round(bgH * k)}px`;
+  if (it.bg) {
+    grid.classList.add('has-bg');
+    grid.style.backgroundImage = `url("./${it.bg}")`;
+    grid.style.backgroundSize =
+      `${Math.round((it.texW || bgW) * k)}px ${Math.round((it.texH || bgH) * k)}px`;
+    grid.style.backgroundPosition = '0 0';
+  } else {
+    grid.classList.remove('has-bg');
+    grid.style.backgroundImage = '';
+  }
 
   grid.innerHTML = slots.map((s, i) => {
     const organId = state.build[i];
     const o = organId ? state.organById.get(organId) : null;
     const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`;
     return `<div class="slot ${o ? '' : 'empty'}" data-i="${i}" style="${style}" title="${o ? esc(o.name) : '空槽位'}">
-      ${o ? icon(o.id, size - 8) : ''}
+      ${o ? icon(o.id, size) : ''}
       ${s.type ? `<span class="st">${esc(s.type.split('_')[0])}</span>` : ''}
     </div>`;
   }).join('');
