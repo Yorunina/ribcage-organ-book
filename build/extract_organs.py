@@ -233,6 +233,22 @@ for p in sorted(TYPE_DIR.rglob('*.json')):
     })
 cavities.sort(key=lambda c: (c['group'], c['id']))
 
+# 用 cc_types 回填槽位布局的名称、默认器官与基础分数（构筑页以槽位布局为单位）
+by_inv = {}
+for c in cavities:
+    by_inv.setdefault(c['inventoryType'], []).append(c)
+for iid, it in inv_types.items():
+    users = by_inv.get(iid, [])
+    it['usedBy'] = [c['id'] for c in users]
+    rep = users[0] if users else None
+    it['defaultOrgans'] = rep['defaultOrgans'] if rep else []
+    it['baseScores'] = rep['baseOrganScores'] if rep else []
+    stem = iid.split(':')[-1]
+    label = (mc_lang.get(f'entity.minecraft.{stem}') or MOD_ENTITY.get(stem) or stem)
+    if rep and rep['name'] and rep['name'] != stem:
+        label = rep['name']
+    it['name'] = f"{label} · {len(it['slots'])} 格"
+
 events = {}
 for o in out_organs:
     for e in o['events']:

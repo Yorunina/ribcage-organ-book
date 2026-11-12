@@ -20,6 +20,9 @@ No Flesh Within Chest 2 的器官静态站，纯前端（原生 HTML/CSS/JS）�
 | 胸腔类型 / 槽位 / GUI 底图 | `kubejs/data/kubejs/cc_types`、`cc_inventory_types`；底图取自 `kubejs/assets/kubejs/textures/gui/chest_cavity` |
 | 材质 | `kubejs/assets/kubejs/textures/item/organs/**` |
 
+tooltip 里的 `%s` 运行时占位符已按器官策略函数补齐：能定位到常量（概率、时长、系数、分数名）的直接填值，
+逻辑复杂的改写成一句逻辑描述；原始行保留在 `effects`，补齐行在 `effectsResolved`。
+
 只能近似、不能精确复现的部分：
 
 - tooltip 中由代码运行期拼出的行、`%s` 数值占位；

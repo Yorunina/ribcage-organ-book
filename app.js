@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '8';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '9';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -191,7 +191,7 @@ function showDetail(id) {
     <div class="detail-head">${icon(o.id, 40)}<h2 class="mc-name">${esc(o.name)}</h2></div>
     <div class="mc-id">${esc(o.id)}</div>
     ${o.flavor.map((t) => `<div class="mc-line flavor">${colorize(t)}</div>`).join('')}
-    ${o.effects.length ? `<div class="mc-sep"></div>${o.effects.map((t) => `<div class="mc-line">${colorize(t)}</div>`).join('')}` : ''}
+    ${o.effects.length ? `<div class="mc-sep"></div>${(o.effectsResolved || o.effects).map((t) => `<div class="mc-line">${colorize(t)}</div>`).join('')}` : ''}
     ${scoreRows ? `<div class="mc-sep"></div>${scoreRows}` : ''}
     ${o.obtain ? `<div class="mc-sep"></div><div class="mc-line muted">${colorize(o.obtain)}</div>` : ''}
     ${evTags ? `<div class="tagline">${evTags}</div>` : ''}
@@ -451,7 +451,7 @@ function runEvent() {
       <div class="idx">${n + 1}</div>
       <div>
         <div><b>${esc(h.organ.name)}</b> <span class="muted">槽位 ${h.slot + 1}</span></div>
-        ${h.organ.effects.length ? h.organ.effects.map((t) => `<div class="eff"><div class="line">${colorize(t)}</div></div>`).join('') : '<div class="eff muted">（该器官的此事件效果由脚本直接结算，无静态文本）</div>'}
+        ${h.organ.effects.length ? (h.organ.effectsResolved || h.organ.effects).map((t) => `<div class="eff"><div class="line">${colorize(t)}</div></div>`).join('') : '<div class="eff muted">（该器官的此事件效果由脚本直接结算，无静态文本）</div>'}
       </div>
     </div>`).join('') || '';
 
