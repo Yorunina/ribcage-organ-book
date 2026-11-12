@@ -7,9 +7,12 @@ const state = {
   cavityId: 'kubejs:player_17',
   build: {},           // slotIndex -> organId
   selected: null,
+  page: 0,
 };
 
-const DATA_V = '15';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const PAGE_SIZE = 60;
+
+const DATA_V = '16';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -153,6 +156,18 @@ function initCodex() {
     const c = e.target.closest('.card');
     if (c) showDetail(c.dataset.id);
   });
+  $('#grid').addEventListener('wheel', (e) => {
+    const totalPages = Math.max(1, Math.ceil(matched().length / PAGE_SIZE));
+    if (totalPages <= 1) return;
+    e.preventDefault();
+    const direction = e.deltaY > 0 ? 1 : -1;
+    const next = Math.max(0, Math.min(totalPages - 1, state.page + direction));
+    if (next !== state.page) {
+      state.page = next;
+      renderGrid();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, { passive: false });
   renderGrid();
 }
 
@@ -173,8 +188,12 @@ function matched() {
 
 function renderGrid() {
   const list = matched();
-  $('#count').textContent = `${list.length} 个器官`;
-  const html = list.map((o) => `
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  state.page = Math.min(state.page, totalPages - 1);
+  const start = state.page * PAGE_SIZE;
+  const pageList = list.slice(start, start + PAGE_SIZE);
+  $('#count').textContent = `${list.length} 个器官 · 第 ${state.page + 1}/${totalPages} 页`;
+  const html = pageList.map((o) => `
     <button class="card" data-id="${o.id}">
       ${icon(o.id, 32)}
       <span><span class="n">${esc(o.name)}</span><span class="g">${GROUPS[o.group] || o.group} · R${o.rank}</span></span>
