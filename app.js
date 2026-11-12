@@ -4,7 +4,7 @@ const state = {
   organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, atlas: { cols: 20, rows: 16, map: {} },
   organById: new Map(),
   filters: { q: '', group: '', rank: '', event: '', score: '' },
-  cavityId: 'kubejs:player',
+  cavityId: 'kubejs:player_17',
   build: {},           // slotIndex -> organId
   selected: null,
 };
@@ -65,7 +65,7 @@ function icon(id, size) {
 
 /* ---------- 数据加载 ---------- */
 async function boot() {
-  const DATA_V = '5';   // 数据版本：重新生成 JSON 后递增，绕过 CDN 缓存
+  const DATA_V = '6';   // 数据版本：重新生成 JSON 后递增，绕过 CDN 缓存
   const load = (f) => fetch(`./data/${f}?v=${DATA_V}`, { cache: 'no-cache' }).then((r) => r.json());
   const [organs, scores, cavities, invTypes, events, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
@@ -203,20 +203,19 @@ function showDetail(id) {
 
 /* ---------- 构筑 ---------- */
 function cavity() {
-  return state.cavities.find((c) => c.id === state.cavityId) || state.cavities[0];
+  return state.invTypes[state.cavityId] || state.invTypes['kubejs:player_17'] ||
+    state.invTypes[Object.keys(state.invTypes)[0]];
 }
 
-function invTypeFor(c) {
-  return state.invTypes[c.inventoryType] || null;
+function invTypeFor() {
+  return cavity();
 }
 
 function initBuilder() {
-  const groups = {};
-  state.cavities.forEach((c) => (groups[c.group] ||= []).push(c));
-  const opts = Object.entries(groups).map(([g, arr]) =>
-    `<optgroup label="${esc(g)}">` +
-    arr.map((c) => `<option value="${c.id}">${esc(c.name)} · ${c.id.split(':')[1]}</option>`).join('') +
-    '</optgroup>').join('');
+  const list = Object.values(state.invTypes)
+    .sort((a, b) => b.slots.length - a.slots.length || a.id.localeCompare(b.id));
+  const opts = list.map((t) =>
+    `<option value="${t.id}">${esc(t.name)}${t.usedBy.length ? ` · 用于 ${t.usedBy.length} 种胸腔` : ' · 未被使用'}</option>`).join('');
   $('#cavitySelect').innerHTML = opts;
   $('#cavitySelect').value = state.cavityId;
   $('#cavitySelect').addEventListener('change', (e) => {
@@ -242,7 +241,7 @@ function initBuilder() {
     try {
       const raw = $('#share').value.trim();
       const data = JSON.parse(b64urlDecode(raw));
-      if (!state.cavities.some((c) => c.id === data.c)) throw new Error('未知胸腔类型');
+      if (!state.invTypes[data.c]) throw new Error('未知槽位布局');
       state.cavityId = data.c;
       $('#cavitySelect').value = data.c;
       state.build = {};
@@ -283,8 +282,7 @@ function b64urlDecode(s) {
 }
 
 function renderSlots() {
-  const c = cavity();
-  const it = invTypeFor(c);
+  const it = cavity();
   const grid = $('#slotgrid');
   if (!it || !it.slots.length) {
     grid.innerHTML = '<p class="hint">该胸腔类型没有槽位数据。</p>';
@@ -326,15 +324,15 @@ function renderSlots() {
     if (!el) return;
     openPicker(Number(el.dataset.i));
   };
-  $('#cavityHint').textContent =
-    `${c.name} · ${slots.length} 个槽位 · 布局 ${c.inventoryType}${c.defaultOrgans.length ? ` · 默认 ${c.defaultOrgans.length} 件器官` : ''}`;
+  const users = it.usedBy.length ? ` · 用于 ${it.usedBy.length} 种胸腔` : ' · 未被任何胸腔类型使用';
+  $('#cavityHint').textContent = `${it.name}${users}${it.defaultOrgans.length ? ` · 默认 ${it.defaultOrgans.length} 件器官` : ''}`;
   renderTotals();
 }
 
 function renderTotals() {
   const c = cavity();
   const acc = {};
-  (c.baseOrganScores || []).forEach((s) => {
+  (c.baseScores || []).forEach((s) => {
     acc[s.id] = (acc[s.id] || 0) + Number(s.value);
   });
   Object.values(state.build).forEach((id) => {
@@ -393,8 +391,7 @@ function initEvents() {
     const ev = $('#eventSelect').value;
     const pool = (state.events[ev]?.organs || []).map((id) => state.organById.get(id)).filter(Boolean);
     if (!pool.length) return;
-    const c = cavity();
-    const it = invTypeFor(c);
+    const it = cavity();
     const slotCount = it ? it.slots.length : 0;
     state.build = {};
     const picks = pool.slice().sort((a, b) => b.rank - a.rank).slice(0, Math.min(slotCount, 8));
@@ -413,7 +410,7 @@ function switchView(name) {
 function buildScoreSummary() {
   const c = cavity();
   const acc = {};
-  (c.baseOrganScores || []).forEach((s) => { acc[s.id] = (acc[s.id] || 0) + Number(s.value); });
+  (c.baseScores || []).forEach((s) => { acc[s.id] = (acc[s.id] || 0) + Number(s.value); });
   Object.values(state.build).forEach((id) => {
     const o = state.organById.get(id);
     if (!o) return;
