@@ -9,6 +9,8 @@ const state = {
   selected: null,
 };
 
+const DATA_V = '7';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
@@ -65,7 +67,6 @@ function icon(id, size) {
 
 /* ---------- 数据加载 ---------- */
 async function boot() {
-  const DATA_V = '6';   // 数据版本：重新生成 JSON 后递增，绕过 CDN 缓存
   const load = (f) => fetch(`./data/${f}?v=${DATA_V}`, { cache: 'no-cache' }).then((r) => r.json());
   const [organs, scores, cavities, invTypes, events, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
@@ -217,6 +218,11 @@ function initBuilder() {
   const opts = list.map((t) =>
     `<option value="${t.id}">${esc(t.name)}${t.usedBy.length ? ` · 用于 ${t.usedBy.length} 种胸腔` : ' · 未被使用'}</option>`).join('');
   $('#cavitySelect').innerHTML = opts;
+
+  // 预取所有 GUI 底图，避免切布局时底色空一会儿
+  Object.values(state.invTypes).forEach((t) => {
+    if (t.bg) new Image().src = `./${t.bg}?v=${DATA_V}`;
+  });
   $('#cavitySelect').value = state.cavityId;
   $('#cavitySelect').addEventListener('change', (e) => {
     state.cavityId = e.target.value;
@@ -300,7 +306,7 @@ function renderSlots() {
   grid.style.height = `${Math.round(bgH * k)}px`;
   if (it.bg) {
     grid.classList.add('has-bg');
-    grid.style.backgroundImage = `url("./${it.bg}")`;
+    grid.style.backgroundImage = `url("./${it.bg}?v=${DATA_V}")`;
     grid.style.backgroundSize =
       `${Math.round((it.texW || bgW) * k)}px ${Math.round((it.texH || bgH) * k)}px`;
     grid.style.backgroundPosition = '0 0';
