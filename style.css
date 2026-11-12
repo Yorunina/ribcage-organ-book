@@ -222,3 +222,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
   .split,.builder{grid-template-columns:1fr}
   .detail{left:12px;right:12px;width:auto}
 }
+
+
+/* ---------- 样式专项预览 ---------- */
+:root{--bg:#0b1017;--bg-2:#101823;--panel:#131d29;--panel-2:#182332;--slot:#0b111a;--line:#253244;--line-hi:#3b4d63;--text:#e8eef7;--muted:#8190a3;--accent:#66d3bb;--accent-2:#88a9ff;--warn:#e5b56b;--radius:6px}
+body{font-size:13px;background:linear-gradient(180deg,#0b1017 0%,#0d141e 70%,#0a0f16 100%)}
+.top{height:52px;padding:8px 24px;background:rgba(9,14,21,.94);border-bottom:1px solid #263447}
+.brand b{font-size:14px;letter-spacing:.02em}.brand span{font-size:10px;color:#728197}
+.tabs{gap:4px}.tab{padding:7px 13px;border-radius:6px;color:#8c9aac}.tab[aria-selected=true]{background:#1a2737;border-color:#3b4d63;box-shadow:inset 0 -2px 0 var(--accent);color:#eff7ff}
+.wrap{max-width:1440px;padding:22px 26px 70px}.split{grid-template-columns:226px minmax(0,1fr);gap:22px}
+.panel{background:linear-gradient(180deg,#151f2c,#121b27);border-color:#26364a;border-radius:7px;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.panel h3{font-size:11px;letter-spacing:.13em;color:#a8b6c8;margin-bottom:14px}.field{margin-bottom:15px}.field span{font-size:10px;letter-spacing:.04em;color:#8190a3}
+input[type=text],input[type=search],select,textarea{background:#0b121b;border-color:#2b3b50;border-radius:5px;padding:8px 10px}input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(102,211,187,.1)}
+.chips{gap:6px}.chip{padding:4px 9px;background:#172332;border-color:#29394d;border-radius:5px;font-size:11px}.chip[aria-pressed=true]{background:#63cdb6;color:#08110f;border-color:#63cdb6}
+.resultbar{height:34px;margin-bottom:10px;align-items:center;justify-content:space-between}.resultbar strong{font-size:12px;color:#dbe7f3}.resulthint{margin-left:10px;color:#708096;font-size:11px}
+.pager{display:flex;align-items:center;gap:7px;color:#91a0b3;font-size:11px}.pagebtn{width:27px;height:25px;border:1px solid #33465d;background:#172332;border-radius:5px;color:#dbe8f4}.pagebtn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}.pagebtn:disabled{opacity:.35;cursor:default}
+.grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.card{min-width:0;min-height:58px;gap:9px;padding:8px 9px;background:linear-gradient(135deg,#172331,#131d29);border-color:#293a4f;border-radius:5px;transition:transform .12s,border-color .12s,background .12s}.card:hover{transform:translateY(-1px);border-color:#58718e;background:#1b2a3c}.card .ico{width:32px!important;height:32px!important}.card .n{font-size:11px;color:#e9f1fb}.card .g{font-size:10px;color:#7f91a8;margin-top:2px}
+.detail{top:68px;right:24px;bottom:24px;width:410px;background:rgba(11,17,25,.98);border-color:#3b4d63;border-radius:8px;padding:18px 20px;box-shadow:0 18px 60px rgba(0,0,0,.55)}.detail-head{padding-bottom:10px;border-bottom:1px solid #253447}.mc-name{font-size:16px}.mc-id{margin-top:3px;color:#74869c}.mc-sep{background:#253447;margin:13px 0}.mc-line{font-size:12px;line-height:1.65}.score-row{padding:4px 0}.tag{background:#162332;border-color:#31445b;color:#a9b8ca}
+.builder{grid-template-columns:minmax(0,1fr) 330px;gap:22px}.cavity{background:#101923;border-color:#2a3b50;padding:20px}.btn{border-radius:5px;padding:7px 11px;background:#172434;border-color:#3a4d63}.btn.primary{background:var(--accent);border-color:var(--accent)}
+.bonds{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.bond{background:linear-gradient(180deg,#151f2c,#111a25);border-color:#293b50;border-radius:7px}.bond-head h3{font-size:14px}.bond-tag{background:#101a26}.bond-organ{background:#111d2a}.bond-organ:hover{background:#1b2c3e}
+.fx{max-height:300px}.fx-row{padding:7px 0}.fx-name{color:#79d9c2}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(5,minmax(0,1fr))}.bonds{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.wrap{padding:14px}.split,.builder{grid-template-columns:1fr}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.detail{left:12px;right:12px;width:auto}.top{padding:8px 14px}.brand span{display:none}}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bonds{grid-template-columns:1fr}.resulthint{display:none}}
+
+/* 预览：图鉴改为连续滚动浏览 */
+#pager{display:none}

@@ -116,7 +116,7 @@ function initCodex() {
     $$('#groups .chip').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', String(!on));
     state.filters.group = on ? '' : b.dataset.g;
-    renderGrid();
+    resetPage();
   });
 
   const ranks = [...new Set(state.organs.map((o) => o.rank))].sort((a, b) => a - b);
@@ -129,7 +129,7 @@ function initCodex() {
     $$('#ranks .chip').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', String(!on));
     state.filters.rank = on ? '' : b.dataset.r;
-    renderGrid();
+    resetPage();
   });
 
   const evs = Object.entries(state.events).sort((a, b) => b[1].organs.length - a[1].organs.length);
@@ -137,7 +137,7 @@ function initCodex() {
     evs.map(([k, v]) => `<option value="${k}">${esc(v.name)} · ${v.organs.length}</option>`).join('');
   $('#eventFilter').addEventListener('change', (e) => {
     state.filters.event = e.target.value;
-    renderGrid();
+    resetPage();
   });
 
   const scoreIds = [...new Set(state.organs.flatMap((o) => Object.keys(o.scores)))].sort();
@@ -150,25 +150,29 @@ function initCodex() {
 
   $('#q').addEventListener('input', (e) => {
     state.filters.q = e.target.value.trim().toLowerCase();
-    renderGrid();
+    resetPage();
   });
   $('#grid').addEventListener('click', (e) => {
     const c = e.target.closest('.card');
     if (c) showDetail(c.dataset.id);
   });
-  $('#grid').addEventListener('wheel', (e) => {
-    const totalPages = Math.max(1, Math.ceil(matched().length / PAGE_SIZE));
-    if (totalPages <= 1) return;
-    e.preventDefault();
-    const direction = e.deltaY > 0 ? 1 : -1;
-    const next = Math.max(0, Math.min(totalPages - 1, state.page + direction));
-    if (next !== state.page) {
-      state.page = next;
-      renderGrid();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, { passive: false });
+  $('#pagePrev').addEventListener('click', () => changePage(-1));
+  $('#pageNext').addEventListener('click', () => changePage(1));
   renderGrid();
+}
+
+function resetPage() {
+  state.page = 0;
+  renderGrid();
+}
+
+function changePage(delta) {
+  const totalPages = Math.max(1, Math.ceil(matched().length / PAGE_SIZE));
+  const next = Math.max(0, Math.min(totalPages - 1, state.page + delta));
+  if (next === state.page) return;
+  state.page = next;
+  renderGrid();
+  document.querySelector('#grid')?.focus({ preventScroll: true });
 }
 
 function matched() {
@@ -188,12 +192,11 @@ function matched() {
 
 function renderGrid() {
   const list = matched();
-  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-  state.page = Math.min(state.page, totalPages - 1);
-  const start = state.page * PAGE_SIZE;
-  const pageList = list.slice(start, start + PAGE_SIZE);
-  $('#count').textContent = `${list.length} 个器官 · 第 ${state.page + 1}/${totalPages} 页`;
-  const html = pageList.map((o) => `
+  $('#count').textContent = `${list.length} 个器官`;
+  $('#pageText').textContent = '滚动浏览';
+  $('#pagePrev').disabled = true;
+  $('#pageNext').disabled = true;
+  const html = list.map((o) => `
     <button class="card" data-id="${o.id}">
       ${icon(o.id, 32)}
       <span><span class="n">${esc(o.name)}</span><span class="g">${GROUPS[o.group] || o.group} · R${o.rank}</span></span>

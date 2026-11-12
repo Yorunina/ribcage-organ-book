@@ -37,7 +37,14 @@
         <div class="hint">数据由整合包脚本与语言文件生成，tooltip 为静态文本还原。</div>
       </aside>
       <div>
-        <div class="resultbar"><span id="count">—</span><span>·</span><span class="muted">滚轮翻页，点击查看 tooltip</span></div>
+        <div class="resultbar">
+          <div><strong id="count">—</strong><span class="resulthint">滚动浏览 · 点击查看详情</span></div>
+          <div class="pager" id="pager">
+            <button class="pagebtn" id="pagePrev" aria-label="上一页">←</button>
+            <span id="pageText">1 / 1</span>
+            <button class="pagebtn" id="pageNext" aria-label="下一页">→</button>
+          </div>
+        </div>
         <div class="grid" id="grid"></div>
       </div>
     </div>
