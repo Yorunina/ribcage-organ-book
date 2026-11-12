@@ -9,7 +9,7 @@ const state = {
   selected: null,
 };
 
-const DATA_V = '7';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
+const DATA_V = '8';   // 数据/底图版本：重新生成数据或改底图后递增，绕过 CDN 缓存
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -219,10 +219,12 @@ function initBuilder() {
     `<option value="${t.id}">${esc(t.name)}${t.usedBy.length ? ` · 用于 ${t.usedBy.length} 种胸腔` : ' · 未被使用'}</option>`).join('');
   $('#cavitySelect').innerHTML = opts;
 
-  // 预取所有 GUI 底图，避免切布局时底色空一会儿
-  Object.values(state.invTypes).forEach((t) => {
-    if (t.bg) new Image().src = `./${t.bg}?v=${DATA_V}`;
-  });
+  // 其余底图等首屏稳定后再预取，避免和当前底图抢带宽
+  setTimeout(() => {
+    Object.values(state.invTypes).forEach((t) => {
+      if (t.bg) new Image().src = `./${t.bg}?v=${DATA_V}`;
+    });
+  }, 2500);
   $('#cavitySelect').value = state.cavityId;
   $('#cavitySelect').addEventListener('change', (e) => {
     state.cavityId = e.target.value;
