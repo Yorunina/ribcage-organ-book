@@ -4,12 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RibCage 器官图鉴</title>
-<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=16">
-<link rel="stylesheet" href="./style.css?v=16">
+<meta name="description" content="No Flesh Within Chest 2 · 器官图鉴与构筑器">
+<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=18">
+<link rel="stylesheet" href="./style.css?v=18">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><b>RibCage 器官图鉴</b><span>No Flesh Within Chest 2</span></div>
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <div class="brand-text"><b>RibCage 器官图鉴</b><span>No Flesh Within Chest 2</span></div>
+  </div>
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-view="codex" aria-selected="true">图鉴</button>
     <button class="tab" role="tab" data-view="builder" aria-selected="false">构筑</button>
@@ -18,55 +22,71 @@
 </header>
 
 <main class="wrap">
-  <!-- 图鉴 -->
   <section class="view active" id="view-codex">
-    <div class="split">
-      <aside class="panel">
-        <h3>筛选</h3>
-        <label class="field"><span>搜索</span>
-          <input type="search" id="q" placeholder="名称 / id / 效果文本">
+    <div class="codex">
+      <aside class="filters" id="filters">
+        <div class="filter-head">
+          <h2>筛选</h2>
+          <button class="linkbtn" id="resetFilters">重置</button>
+        </div>
+        <label class="search">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input type="search" id="q" placeholder="名称 / ID / 效果" autocomplete="off">
         </label>
-        <div class="field"><span>分类</span><div class="chips" id="groups"></div></div>
-        <div class="field"><span>触发事件</span>
-          <select id="eventFilter"><option value="">全部</option></select>
+        <div class="filter-group">
+          <h3>分类</h3>
+          <div class="chips" id="groups"></div>
         </div>
-        <div class="field"><span>稀有度</span><div class="chips" id="ranks"></div></div>
-        <div class="field"><span>属性</span>
-          <select id="scoreFilter"><option value="">全部</option></select>
+        <div class="filter-group">
+          <h3>稀有度</h3>
+          <div class="chips" id="ranks"></div>
         </div>
-        <div class="hint">数据由整合包脚本与语言文件生成，tooltip 为静态文本还原。</div>
+        <div class="filter-group">
+          <h3>触发事件</h3>
+          <select id="eventFilter"><option value="">全部事件</option></select>
+        </div>
+        <div class="filter-group">
+          <h3>属性</h3>
+          <select id="scoreFilter"><option value="">全部属性</option></select>
+        </div>
+        <p class="filters-note">数据由整合包脚本与语言文件生成。</p>
       </aside>
-      <div>
+
+      <div class="results">
         <div class="resultbar">
-          <div><strong id="count">—</strong><span class="resulthint">滚动浏览 · 点击查看详情</span></div>
-          <div class="pager" id="pager">
-            <button class="pagebtn" id="pagePrev" aria-label="上一页">←</button>
-            <span id="pageText">1 / 1</span>
-            <button class="pagebtn" id="pageNext" aria-label="下一页">→</button>
-          </div>
+          <div class="result-count"><strong id="count">—</strong><span class="muted">个器官</span></div>
+          <button class="btn ghost only-narrow" id="toggleFilters">筛选</button>
         </div>
         <div class="grid" id="grid"></div>
       </div>
+
+      <aside class="detail" id="detail" aria-live="polite">
+        <div class="detail-empty" id="detailEmpty">
+          <span class="empty-mark" aria-hidden="true"></span>
+          <p>点选一个器官<br>查看属性、特殊效果与获取方式</p>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </aside>
     </div>
   </section>
 
-  <!-- 构筑 -->
   <section class="view" id="view-builder">
     <div class="builder">
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;align-items:end;margin-bottom:12px">
-          <label class="field" style="margin:0;flex:1 1 260px"><span>胸腔槽位布局（cc_inventory_type）</span>
+      <div class="panel builder-main">
+        <div class="builder-head">
+          <label class="field">
+            <span>胸腔槽位布局</span>
             <select id="cavitySelect"></select>
           </label>
           <div class="row">
             <button class="btn" id="fillDefault">填入默认器官</button>
-            <button class="btn" id="clearBuild">清空</button>
+            <button class="btn ghost" id="clearBuild">清空</button>
           </div>
         </div>
         <div class="cavity"><div class="slotgrid" id="slotgrid"></div></div>
         <p class="hint" id="cavityHint"></p>
       </div>
-      <aside style="display:grid;gap:14px">
+      <aside class="builder-side">
         <div class="panel">
           <h3>属性合计</h3>
           <div class="totals" id="totals"><span class="hint">尚未放入器官</span></div>
@@ -91,23 +111,25 @@
     </div>
   </section>
 
-  <!-- 羁绊 -->
   <section class="view" id="view-bonds">
-    <div class="resultbar"><span id="bondCount">—</span><span>·</span><span class="muted">按器官标签件数生效的组合效果</span></div>
+    <div class="section-head">
+      <h2>器官羁绊</h2>
+      <p class="muted" id="bondCount">—</p>
+    </div>
     <div class="bonds" id="bonds"></div>
   </section>
-
 </main>
 
-<div class="detail" id="detail"></div>
+<div class="scrim" id="scrim"></div>
+
 <div class="picker" id="picker"><div class="box">
   <div class="row" style="justify-content:space-between">
     <input type="search" id="pickQ" placeholder="搜索器官…">
-    <button class="btn" id="pickClear">移除</button>
+    <button class="btn ghost" id="pickClear">移除</button>
   </div>
   <div class="list" id="pickList"></div>
 </div></div>
 
-<script src="./app.js?v=16"></script>
+<script src="./app.js?v=18"></script>
 </body>
 </html>
