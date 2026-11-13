@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '26';
+const DATA_V = '27';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -432,7 +432,7 @@ function onDragMove(e, element) {
     dragState.moved = true; element.classList.add('dragging');
     dragState.ghost = document.createElement('div'); dragState.ghost.className = 'drag-ghost'; dragState.ghost.innerHTML = icon(dragState.id, 34); document.body.appendChild(dragState.ghost);
   }
-  dragState.ghost.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 14}px)`;
+  dragState.ghost.style.transform = `translate(${e.clientX - 17}px,${e.clientY - 17}px)`;
   clearDropStates();
   const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
   if (target) target.classList.add('drop-target');
@@ -499,7 +499,7 @@ function renderSlots() {
     return `<div${tipAttrs} data-i="${i}" style="${style}">${o ? icon(o.id, size) : ''}</div>`;
   }).join('');
   grid.onpointerdown = (e) => { if (e.button !== 0) return; const el = e.target.closest('.slot'); if (!el) return; const i = Number(el.dataset.i); const id = state.build[i]; if (id) beginDrag(e, 'slot', id, i, el); };
-  grid.onclick = (e) => { const el = e.target.closest('.slot'); if (el && !dragState.moved) { $$('.slot.selected').forEach((x) => x.classList.remove('selected')); el.classList.add('selected'); if (!state.build[Number(el.dataset.i)]) openPicker(Number(el.dataset.i)); } };
+  grid.onclick = (e) => { const el = e.target.closest('.slot'); if (el && !dragState.moved && !state.build[Number(el.dataset.i)]) openPicker(Number(el.dataset.i)); };
   grid.oncontextmenu = (e) => { const el = e.target.closest('.slot'); if (!el) return; e.preventDefault(); delete state.build[Number(el.dataset.i)]; renderSlots(); };
   grid.ondblclick = (e) => { const el = e.target.closest('.slot'); if (el && state.build[Number(el.dataset.i)]) { delete state.build[Number(el.dataset.i)]; renderSlots(); } };
   const users = it.usedBy.length ? ` · 用于 ${it.usedBy.length} 种胸腔` : ' · 未被任何胸腔类型使用'; $('#cavityHint').textContent = `${it.name}${users}${it.defaultOrgans.length ? ` · 默认 ${it.defaultOrgans.length} 件器官` : ''}`; renderTotals();
