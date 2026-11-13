@@ -289,8 +289,7 @@ for oid, rec in organs.items():
         'flavor': flavor,
         'effects': effects,
         'activationEffects': activation_for(oid),
-        'slotEffects': (['3件：最大生命值 -25%', '6件：最大生命值再降低25%', '9件：最大生命值再降低50%']
-                        if path.startswith('giant_') else []),
+        'slotEffects': [],
     }
     previous = PREV_ORGANS.get(oid, {}).get('effectsResolved')
     if isinstance(previous, list) and len(previous) == len(effects):
@@ -336,6 +335,17 @@ def resolve_bg(tex):
     except Exception:
         w = h = 0
     return f'mc/gui/{dst.name}', w, h
+
+INVENTORY_LABELS = {
+    'medium_aquatic': '水生胸腔', 'medium_ender': '末影胸腔',
+    'medium_golem': '傀儡胸腔', 'medium_nether': '下界胸腔',
+    'medium_terra': '自然胸腔', 'medium_undead': '亡灵胸腔',
+    'medium_vita': '血肉胸腔', 'small_aquatic': '小型水生胸腔',
+    'small_ender': '小型末影胸腔', 'small_golem': '小型傀儡胸腔',
+    'small_nether': '小型下界胸腔', 'small_terra': '小型自然胸腔',
+    'small_undead': '小型亡灵胸腔', 'small_vita': '小型血肉胸腔',
+    'large_golem': '大型傀儡胸腔',
+}
 
 CAVITY_LABELS = {
     'aquatic': '水生', 'default': '默认', 'ender': '末影', 'factory': '工厂',
@@ -408,9 +418,7 @@ for iid, it in inv_types.items():
     it['defaultOrgans'] = rep['defaultOrgans'] if rep else []
     it['baseScores'] = rep['baseOrganScores'] if rep else []
     stem = iid.split(':')[-1]
-    label = cavity_label(stem, mc_lang.get(f'entity.minecraft.{stem}') or MOD_ENTITY.get(stem))
-    if rep and rep['name'] and rep['name'] != stem and stem not in CAVITY_LABELS:
-        label = rep['name']
+    label = INVENTORY_LABELS.get(stem) or cavity_label(stem, mc_lang.get(f'entity.minecraft.{stem}') or MOD_ENTITY.get(stem))
     it['name'] = f"{label} · {len(it['slots'])} 格"
 
 events = {}

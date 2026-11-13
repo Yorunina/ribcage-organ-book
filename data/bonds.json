@@ -99,6 +99,40 @@
   ]
  },
  {
+  "tag": "kubejs:giant_organ",
+  "name": "巨型器官",
+  "events": [
+   "胸腔变化时"
+  ],
+  "thresholds": [
+   {
+    "count": 3,
+    "text": "（3）最大生命值降低25%"
+   },
+   {
+    "count": 6,
+    "text": "（6）最大生命值再降低25%"
+   },
+   {
+    "count": 9,
+    "text": "（9）最大生命值再降低50%"
+   }
+  ],
+  "organs": [
+   "kubejs:giant_appendix",
+   "kubejs:giant_heart",
+   "kubejs:giant_intestine",
+   "kubejs:giant_kidney",
+   "kubejs:giant_liver",
+   "kubejs:giant_lung",
+   "kubejs:giant_muscle",
+   "kubejs:giant_rib",
+   "kubejs:giant_spine",
+   "kubejs:giant_spleen",
+   "kubejs:giant_stomach"
+  ]
+ },
+ {
   "tag": "kubejs:machine",
   "name": "机械",
   "events": [
@@ -613,27 +647,6 @@
    "kubejs:rose_quartz_muscle",
    "kubejs:rose_quartz_rib",
    "kubejs:rosy_tumor"
-  ]
- },
- {
-  "tag": "kubejs:giant_organ",
-  "name": "giant_organ",
-  "events": [
-   "胸腔变化时"
-  ],
-  "thresholds": [],
-  "organs": [
-   "kubejs:giant_appendix",
-   "kubejs:giant_heart",
-   "kubejs:giant_intestine",
-   "kubejs:giant_kidney",
-   "kubejs:giant_liver",
-   "kubejs:giant_lung",
-   "kubejs:giant_muscle",
-   "kubejs:giant_rib",
-   "kubejs:giant_spine",
-   "kubejs:giant_spleen",
-   "kubejs:giant_stomach"
   ]
  }
 ]
