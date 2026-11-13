@@ -347,7 +347,7 @@ function initBonds() {
 const cavity = () => state.invTypes[state.cavityId] || state.invTypes['kubejs:player_17'] ||
   state.invTypes[Object.keys(state.invTypes)[0]];
 
-const dragState = { active: false, moved: false, suppressClick: false, source: null, id: null, slot: null, x: 0, y: 0, ghost: null };
+const dragState = { active: false, moved: false, suppressClick: false, source: null, id: null, slot: null, x: 0, y: 0, ghost: null, pointerType: '', move: null, up: null };
 
 function initBuilder() {
   const list = Object.values(state.invTypes).sort((a, b) => b.slots.length - a.slots.length || a.id.localeCompare(b.id));
@@ -408,18 +408,26 @@ function onDragStart(e) {
 }
 
 function beginDrag(e, source, id, slot, element) {
-  dragState.active = true; dragState.moved = false; dragState.source = source; dragState.id = id; dragState.slot = slot; dragState.x = e.clientX; dragState.y = e.clientY;
+  dragState.active = true; dragState.moved = false; dragState.source = source; dragState.id = id; dragState.slot = slot; dragState.x = e.clientX; dragState.y = e.clientY; dragState.pointerType = e.pointerType || 'mouse';
   element.classList.add('drag-armed');
   const move = (ev) => onDragMove(ev, element);
   const up = (ev) => onDragEnd(ev, element, move, up);
+  dragState.move = move; dragState.up = up;
   document.addEventListener('pointermove', move);
   document.addEventListener('pointerup', up, { once: true });
   document.addEventListener('pointercancel', up, { once: true });
 }
 
 function onDragMove(e, element) {
-  const dist = Math.hypot(e.clientX - dragState.x, e.clientY - dragState.y);
-  if (!dragState.moved && dist <= 5) return;
+  const dx = e.clientX - dragState.x;
+  const dy = e.clientY - dragState.y;
+  const dist = Math.hypot(dx, dy);
+  if (!dragState.moved && dragState.pointerType === 'touch' && dragState.source === 'library' && Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx) * 1.15) {
+    cancelDragForScroll(element);
+    return;
+  }
+  const threshold = dragState.pointerType === 'touch' ? 12 : 5;
+  if (!dragState.moved && dist <= threshold) return;
   if (!dragState.moved) {
     dragState.moved = true; element.classList.add('dragging');
     dragState.ghost = document.createElement('div'); dragState.ghost.className = 'drag-ghost'; dragState.ghost.innerHTML = icon(dragState.id, 34); document.body.appendChild(dragState.ghost);
@@ -429,6 +437,19 @@ function onDragMove(e, element) {
   const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
   if (target) target.classList.add('drop-target');
   if (dragState.source === 'slot' && document.elementFromPoint(e.clientX, e.clientY)?.closest('#removeZone')) $('#removeZone').classList.add('hot');
+}
+
+function cancelDragForScroll(element) {
+  if (dragState.move) document.removeEventListener('pointermove', dragState.move);
+  if (dragState.up) {
+    document.removeEventListener('pointerup', dragState.up);
+    document.removeEventListener('pointercancel', dragState.up);
+  }
+  if (dragState.ghost) dragState.ghost.remove();
+  clearDropStates();
+  element?.classList.remove('drag-armed', 'dragging');
+  dragState.suppressClick = true;
+  dragState.active = false; dragState.moved = false; dragState.source = null; dragState.id = null; dragState.slot = null; dragState.pointerType = ''; dragState.move = null; dragState.up = null;
 }
 
 function onDragEnd(e, element, move, up) {
@@ -453,7 +474,7 @@ function onDragEnd(e, element, move, up) {
     }
     renderSlots();
   }
-  dragState.active = false; dragState.moved = false; dragState.source = null; dragState.id = null; dragState.slot = null;
+  dragState.active = false; dragState.moved = false; dragState.source = null; dragState.id = null; dragState.slot = null; dragState.pointerType = ''; dragState.move = null; dragState.up = null;
 }
 
 function clearDropStates() { $$('.slot.drop-target').forEach((x) => x.classList.remove('drop-target')); $('#removeZone').classList.remove('hot'); }
