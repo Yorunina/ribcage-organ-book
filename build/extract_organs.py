@@ -1,6 +1,7 @@
 """从 RibCage 仓库提取器官图鉴数据，输出静态站用的 JSON。"""
 import json
 import re
+import zipfile
 from pathlib import Path
 
 PACK = Path('D:/hermes-workspace/ribcage-ws/RibCage')
@@ -9,11 +10,22 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 JS_DIR = PACK / 'kubejs/server_scripts/domain/organ/organ'
 TEX_DIR = PACK / 'kubejs/assets/kubejs/textures/item/organs'
+MODEL_DIR = PACK / 'kubejs/assets/kubejs/models/item'
+SITE_GEN = OUT.parent / 'mc/generated'
+CREATE_JAR = next(iter((PACK / 'mods').glob('create-1.20.1-*.jar')), None)
 LANG = PACK / 'kubejs/assets/kubejs/lang/zh_cn.json'
+CLIENT_DIR = PACK / 'kubejs/client_scripts'
 INV_DIR = PACK / 'kubejs/data/kubejs/cc_inventory_types'
 TYPE_DIR = PACK / 'kubejs/data/kubejs/cc_types'
 
 lang = json.load(open(LANG, encoding='utf-8'))
+PREV_ORGANS = {}
+prev_path = OUT / 'organs.json'
+if prev_path.exists():
+    try:
+        PREV_ORGANS = {o['id']: o for o in json.load(open(prev_path, encoding='utf-8'))}
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        PREV_ORGANS = {}
 MC_LANG = Path('D:/SelfAgent/work/organ-codex/build/mc_zh_cn.json')
 mc_lang = json.load(open(MC_LANG, encoding='utf-8')) if MC_LANG.exists() else {}
 # 全包 lang 汇总：mod 生物名（entity.<ns>.<stem>）
@@ -55,10 +67,121 @@ for k, v in tex_index.items():
 def texture_for(organ_path):
     stem = organ_path.split(':')[-1]
     hits = tex_index.get(stem)
-    if not hits:
+    if hits:
+        rel = hits[0].relative_to(PACK / 'kubejs/assets/kubejs')
+        out = OUT.parent / 'mc' / rel
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(hits[0].read_bytes())
+        return 'mc/' + rel.as_posix()
+    model = MODEL_DIR / f'{stem}_model.json'
+    if not model.exists() or CREATE_JAR is None:
+        ns = organ_path.split(':')[0]
+        for jar in (PACK / 'mods').glob(f'{ns}-*.jar'):
+            try:
+                with zipfile.ZipFile(jar) as z:
+                    raw = z.read(f'assets/{ns}/textures/item/{stem}.png')
+                SITE_GEN.mkdir(parents=True, exist_ok=True)
+                out = SITE_GEN / f'{stem}.png'
+                out.write_bytes(raw)
+                return f'mc/generated/{stem}.png'
+            except (OSError, KeyError, zipfile.BadZipFile):
+                continue
         return None
-    rel = hits[0].relative_to(PACK / 'kubejs/assets/kubejs')
-    return 'mc/' + rel.as_posix()
+    try:
+        data = json.loads(model.read_text(encoding='utf-8'))
+        tex = data.get('textures', {})
+        preferred = tex.get('base') or tex.get('1') or tex.get('particle') or next(iter(tex.values()), '')
+        if ':' not in preferred:
+            preferred = 'create:' + preferred
+        ns, rest = preferred.split(':', 1)
+        src_name = f'assets/{ns}/textures/{rest}.png'
+        with zipfile.ZipFile(CREATE_JAR) as z:
+            raw = z.read(src_name)
+        SITE_GEN.mkdir(parents=True, exist_ok=True)
+        out = SITE_GEN / f'{stem}.png'
+        out.write_bytes(raw)
+        return f'mc/generated/{stem}.png'
+    except (OSError, KeyError, json.JSONDecodeError, zipfile.BadZipFile):
+        return None
+
+# ---------- 激活效果与二级悬浮提示 ----------
+CONST_KEYS = {}
+key_word = CLIENT_DIR / 'const/key_word.js'
+if key_word.exists():
+    for m in re.finditer(r"const\s+(\w+)\s*=\s*Text\.translatable\('([^']+)'", key_word.read_text(encoding='utf-8')):
+        CONST_KEYS[m.group(1)] = m.group(2)
+
+def hover_marker(const_name):
+    key = CONST_KEYS.get(const_name)
+    if not key:
+        return None
+    label = lang.get(key, const_name)
+    details = []
+    stem = key.rsplit('.', 2)[0]
+    i = 1
+    while True:
+        v = lang.get(f'{stem}.{i}')
+        if v is None:
+            break
+        details.append(v)
+        i += 1
+    if not details and key.startswith('tooltips.organ_score.'):
+        score_key = key[len('tooltips.organ_score.'):]
+        desc = lang.get(f'tooltips.organ_score.hover.{score_key}')
+        if desc:
+            details = [desc]
+    if not details:
+        return None
+    return {'label': label, 'details': details}
+
+def resolve_tooltip_expr(expr):
+    expr = expr.strip()
+    marker = hover_marker(expr)
+    if marker:
+        return marker['label'], marker
+    if expr in CONST_KEYS:
+        return lang.get(CONST_KEYS[expr], expr), None
+    m = re.search(r"Text\.translatable\('([^']+)'(.*)\)", expr)
+    if not m:
+        return expr, None
+    key, args = m.group(1), m.group(2)
+    text = lang.get(key, key)
+    values = []
+    for a in re.findall(r"Text\.gold\('([^']*)'\)|Text\.yellow\('([^']*)'\)|\b([A-Z]\w*Hover)\b", args):
+        literal = a[0] or a[1]
+        if literal:
+            values.append(literal)
+        else:
+            hm = hover_marker(a[2])
+            if hm:
+                values.append(f"[[{hm['label']}|{'\\n'.join(hm['details'])}]]")
+            else:
+                values.append(lang.get(CONST_KEYS.get(a[2], ''), a[2]))
+    for value in values:
+        text = text.replace('%s', value, 1)
+    return text, None
+
+def activation_for(oid):
+    result = []
+    for js in sorted((CLIENT_DIR / 'tooltips/organ').glob('*.js')):
+        active = False
+        for line in js.read_text(encoding='utf-8').splitlines():
+            m = re.search(r"new MultiStateTooltip\('([^']+)'", line)
+            if m:
+                active = m.group(1) == oid
+                continue
+            if active and re.match(r'\s*\)\s*$', line):
+                active = False
+            if active:
+                m = re.search(r'\.addCtrl\((.*)\)', line)
+                if not m:
+                    continue
+                text, hover = resolve_tooltip_expr(m.group(1))
+                if text.startswith('RelicsOrganScoreTooltips'):
+                    text = '遗物属性激活效果（游戏内按遗物属性展开）'
+                    hover = None
+                result.append({'text': text, 'hover': hover})
+    return result
 
 # ---------- 解析器官注册 ----------
 def chain_of(text, start):
@@ -80,6 +203,8 @@ for js in sorted(JS_DIR.rglob('*.js')):
     src = js.read_text(encoding='utf-8')
     for m in re.finditer(r"RegistryOrgan\(\s*'([^']+)'\s*\)", src):
         oid = m.group(1)
+        if oid == 'kubejs:test':
+            continue
         chain = chain_of(src, m.end() - 1)
         rec = organs.setdefault(oid, {'id': oid, 'scores': {}, 'rank': 0, 'canSpawn': False, 'events': []})
         for sm in re.finditer(r"\.addScore\(\s*'([^']+)'\s*,\s*(-?[\d.]+)\s*\)", chain):
@@ -89,6 +214,20 @@ for js in sorted(JS_DIR.rglob('*.js')):
             rec['rank'] = int(rm.group(1))
         if re.search(r"\.setCanSpawn\(\s*true\s*\)", chain):
             rec['canSpawn'] = True
+
+# ---------- 动态器官注册 ----------
+giant_js = JS_DIR / 'nature/giant_organs.js'
+if giant_js.exists():
+    for line in giant_js.read_text(encoding='utf-8').splitlines():
+        m = re.match(r"\s*(\w+):\s*(\[.*\]),?\s*$", line)
+        if not m:
+            continue
+        oid = 'kubejs:giant_' + m.group(1)
+        scores = {
+            score: float(value)
+            for score, value in re.findall(r"\['([^']+)',\s*(-?[\d.]+)\]", m.group(2))
+        }
+        organs[oid] = {'id': oid, 'scores': scores, 'rank': 0, 'canSpawn': False, 'events': []}
 
 # ---------- 解析策略（事件触发） ----------
 strategy_re = re.compile(r"RegistryOrganStrategy\(\s*new\s+OrganStrategyModel\(\s*'([^']+)'\s*\)(.*?)\)\s*\n\)", re.S)
@@ -118,6 +257,8 @@ for oid, rec in organs.items():
     i = 1
     while True:
         v = lang_get(f'tooltips.kubejs.{path}.default.{i}')
+        if v is None and path.startswith('giant_'):
+            v = lang_get(f'tooltips.kubejs.giant_organ.default.{i}')
         if v is None:
             break
         flavor.append(v)
@@ -129,12 +270,12 @@ for oid, rec in organs.items():
             break
         effects.append(v)
         i += 1
-    group = 'misc'
+    group = 'nature' if path.startswith('giant_') else 'misc'
     for js in JS_DIR.rglob(f'{path}.js'):
         rel = js.relative_to(JS_DIR).parts
         group = rel[0] if len(rel) > 1 else 'misc'
         break
-    out_organs.append({
+    item = {
         'id': oid,
         'path': path,
         'name': name,
@@ -147,9 +288,16 @@ for oid, rec in organs.items():
         'obtain': obtain,
         'flavor': flavor,
         'effects': effects,
-    })
+        'activationEffects': activation_for(oid),
+        'slotEffects': (['3件：最大生命值 -25%', '6件：最大生命值再降低25%', '9件：最大生命值再降低50%']
+                        if path.startswith('giant_') else []),
+    }
+    previous = PREV_ORGANS.get(oid, {}).get('effectsResolved')
+    if isinstance(previous, list) and len(previous) == len(effects):
+        item['effectsResolved'] = previous
+    out_organs.append(item)
 
-out_organs.sort(key=lambda o: (o['group'], o['id']))
+out_organs.sort(key=lambda o: (-o['rank'], o['group'], o['id']))
 
 # ---------- 分数表 ----------
 scores = {}
@@ -189,6 +337,23 @@ def resolve_bg(tex):
         w = h = 0
     return f'mc/gui/{dst.name}', w, h
 
+CAVITY_LABELS = {
+    'aquatic': '水生', 'default': '默认', 'ender': '末影', 'factory': '工厂',
+    'functional_entity': '功能实体', 'gula': '暴食', 'large_golem': '大型傀儡',
+    'plant': '植物', 'relics': '遗物', 'relics_awakening': '遗物·觉醒',
+    'revolution_machine': '革命机器', 'rose': '玫瑰',
+    'transdimensional_mechanized': '跨维度机械', 'transdimensional_plant': '跨维度植物',
+    'transdimensional_relics': '跨维度遗物', 'transdimensional_rose': '跨维度玫瑰',
+    'player_17': '玩家·17格', 'player_21': '玩家·21格', 'player_25': '玩家·25格',
+    'player_27': '玩家·27格',
+}
+
+def cavity_label(stem, fallback=''):
+    return (lang_get(f'tooltips.kubejs.hover.{stem}_type.0')
+            or CAVITY_LABELS.get(stem)
+            or fallback
+            or stem)
+
 inv_types = {}
 for p in sorted(INV_DIR.glob('*.json')):
     d = json.load(open(p, encoding='utf-8'))
@@ -216,12 +381,11 @@ cavities = []
 for p in sorted(TYPE_DIR.rglob('*.json')):
     d = json.load(open(p, encoding='utf-8'))
     cid = 'kubejs:' + p.stem
-    cname = (SPECIAL_CAVITY.get(p.stem)
-             or mc_lang.get(f'entity.minecraft.{p.stem}')
-             or MOD_ENTITY.get(p.stem)
-             or lang_get(f'entity.minecraft.{p.stem}')
-             or lang_get(f'entity.kubejs.{p.stem}')
-             or p.stem)
+    cname = cavity_label(p.stem, SPECIAL_CAVITY.get(p.stem)
+                         or mc_lang.get(f'entity.minecraft.{p.stem}')
+                         or MOD_ENTITY.get(p.stem)
+                         or lang_get(f'entity.minecraft.{p.stem}')
+                         or lang_get(f'entity.kubejs.{p.stem}'))
     cavities.append({
         'id': cid,
         'name': cname,
@@ -244,8 +408,8 @@ for iid, it in inv_types.items():
     it['defaultOrgans'] = rep['defaultOrgans'] if rep else []
     it['baseScores'] = rep['baseOrganScores'] if rep else []
     stem = iid.split(':')[-1]
-    label = (mc_lang.get(f'entity.minecraft.{stem}') or MOD_ENTITY.get(stem) or stem)
-    if rep and rep['name'] and rep['name'] != stem:
+    label = cavity_label(stem, mc_lang.get(f'entity.minecraft.{stem}') or MOD_ENTITY.get(stem))
+    if rep and rep['name'] and rep['name'] != stem and stem not in CAVITY_LABELS:
         label = rep['name']
     it['name'] = f"{label} · {len(it['slots'])} 格"
 
@@ -254,11 +418,17 @@ for o in out_organs:
     for e in o['events']:
         events.setdefault(e['event'], []).append(o['id'])
 events_out = {k: {'name': EVENT_NAMES.get(k, k), 'organs': sorted(v)} for k, v in sorted(events.items())}
+slot_types = {}
+for key, value in lang.items():
+    match = re.fullmatch(r'slot_type\.chestcavity\.([^.]*)\.(name|desc)', key)
+    if match:
+        slot_types.setdefault(match.group(1), {})[match.group(2)] = value.strip()
 
 json.dump(out_organs, open(OUT / 'organs.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 json.dump(scores, open(OUT / 'scores.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 json.dump(cavities, open(OUT / 'cavities.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 json.dump(inv_types, open(OUT / 'inventory_types.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+json.dump(slot_types, open(OUT / 'slot_types.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 json.dump(events_out, open(OUT / 'events.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 
 print('organs', len(out_organs),

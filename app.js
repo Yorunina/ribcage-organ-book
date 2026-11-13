@@ -1,7 +1,7 @@
 'use strict';
 
 const state = {
-  organs: [], scores: {}, cavities: [], invTypes: {}, events: {}, bonds: [], bondTags: new Map(),
+  organs: [], scores: {}, cavities: [], invTypes: {}, slotTypes: {}, events: {}, bonds: [], bondTags: new Map(),
   atlas: { cols: 20, rows: 16, map: {} },
   organById: new Map(),
   filters: { q: '', group: '', rank: '', event: '', score: '' },
@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '24';
+const DATA_V = '26';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -65,11 +65,11 @@ function icon(id, size) {
 /* ---------- boot ---------- */
 async function boot() {
   const load = (f) => fetch(`./data/${f}?v=${DATA_V}`, { cache: 'no-cache' }).then((r) => r.json());
-  const [organs, scores, cavities, invTypes, events, bonds, atlas] = await Promise.all([
+  const [organs, scores, cavities, invTypes, slotTypes, events, bonds, atlas] = await Promise.all([
     load('organs.json'), load('scores.json'), load('cavities.json'),
-    load('inventory_types.json'), load('events.json'), load('bonds.json'), load('atlas.json'),
+    load('inventory_types.json'), load('slot_types.json'), load('events.json'), load('bonds.json'), load('atlas.json'),
   ]);
-  Object.assign(state, { atlas, organs, scores, cavities, invTypes, events, bonds });
+  Object.assign(state, { atlas, organs, scores, cavities, invTypes, slotTypes, events, bonds });
   state.bondTags = new Map();
   bonds.forEach((b) => b.organs.forEach((id) => {
     if (!state.bondTags.has(id)) state.bondTags.set(id, []);
@@ -138,11 +138,11 @@ function initTooltip() {
   const hide = () => tip.classList.remove('on');
 
   document.addEventListener('mouseover', (e) => {
-    const term = e.target.closest?.('.hover-term');
+    const term = e.target.closest?.('.hover-term, .slot-tip');
     if (term) show(term); else hide();
   });
   document.addEventListener('focusin', (e) => {
-    const term = e.target.closest?.('.hover-term');
+    const term = e.target.closest?.('.hover-term, .slot-tip');
     if (term) show(term); else hide();
   });
   document.addEventListener('scroll', hide, true);
@@ -488,7 +488,16 @@ function renderSlots() {
   const slots = it.slots; const bgW = (it.size && it.size.x) || (Math.max(...slots.map((s) => s.x)) + 18); const bgH = (it.size && it.size.y) || (Math.max(...slots.map((s) => s.y)) + 18); const k = Math.min(2, 620 / bgW); const size = Math.round(16 * k);
   grid.style.position = 'relative'; grid.style.width = `${Math.round(bgW * k)}px`; grid.style.height = `${Math.round(bgH * k)}px`;
   if (it.bg) { grid.classList.add('has-bg'); grid.style.backgroundImage = `url("./${it.bg}?v=${DATA_V}")`; grid.style.backgroundSize = `${Math.round((it.texW || bgW) * k)}px ${Math.round((it.texH || bgH) * k)}px`; grid.style.backgroundPosition = '0 0'; } else { grid.classList.remove('has-bg'); grid.style.backgroundImage = ''; }
-  grid.innerHTML = slots.map((s, i) => { const organId = state.build[i]; const o = organId ? state.organById.get(organId) : null; const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`; return `<div class="slot ${o ? '' : 'empty'}" data-i="${i}" style="${style}" title="${o ? esc(o.name) : '空槽位'}">${o ? icon(o.id, size) : ''}${s.type ? `<span class="st">${esc(s.type.split('_')[0])}</span>` : ''}</div>`; }).join('');
+  const typeNumbers = {};
+  grid.innerHTML = slots.map((s, i) => {
+    const organId = state.build[i]; const o = organId ? state.organById.get(organId) : null;
+    const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`;
+    const typeInfo = s.type ? state.slotTypes[s.type] : null;
+    const typeNo = s.type ? (typeNumbers[s.type] = (typeNumbers[s.type] || 0) + 1) : 0;
+    const tip = typeInfo ? [typeInfo.name?.replace('%s', String(typeNo)), typeInfo.desc].filter(Boolean).join('\n') : '';
+    const tipAttrs = tip ? ` class="slot ${o ? '' : 'empty'} slot-tip" tabindex="0" data-tip="${esc(tip)}" aria-label="${esc(tip.replace(/\n/g, ' '))}"` : ` class="slot ${o ? '' : 'empty'}"`;
+    return `<div${tipAttrs} data-i="${i}" style="${style}">${o ? icon(o.id, size) : ''}</div>`;
+  }).join('');
   grid.onpointerdown = (e) => { if (e.button !== 0) return; const el = e.target.closest('.slot'); if (!el) return; const i = Number(el.dataset.i); const id = state.build[i]; if (id) beginDrag(e, 'slot', id, i, el); };
   grid.onclick = (e) => { const el = e.target.closest('.slot'); if (el && !dragState.moved) { $$('.slot.selected').forEach((x) => x.classList.remove('selected')); el.classList.add('selected'); if (!state.build[Number(el.dataset.i)]) openPicker(Number(el.dataset.i)); } };
   grid.oncontextmenu = (e) => { const el = e.target.closest('.slot'); if (!el) return; e.preventDefault(); delete state.build[Number(el.dataset.i)]; renderSlots(); };
