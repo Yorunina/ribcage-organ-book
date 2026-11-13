@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '20';
+const DATA_V = '21';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -102,6 +102,7 @@ function closeDrawers() {
 
 function initShell() {
   $('#scrim').addEventListener('click', closeDrawers);
+  initTooltip();
   $('#toggleFilters').addEventListener('click', () => {
     $('#filters').classList.add('open');
     $('#scrim').classList.add('on');
@@ -113,6 +114,39 @@ function initShell() {
     }
     if (e.key === 'Escape') closeDrawers();
   });
+}
+
+function initTooltip() {
+  const tip = document.createElement('div');
+  tip.className = 'tip';
+  document.body.appendChild(tip);
+
+  const show = (term) => {
+    const text = term.dataset.tip;
+    if (!text) return;
+    tip.innerHTML = text.split('\n').map(colorize).join('<br>');
+    tip.classList.add('on');
+    const r = term.getBoundingClientRect();
+    const box = tip.getBoundingClientRect();
+    let left = r.left;
+    if (left + box.width > window.innerWidth - 12) left = window.innerWidth - box.width - 12;
+    let top = r.top - box.height - 8;
+    if (top < 64) top = r.bottom + 8;
+    tip.style.left = `${Math.max(12, left)}px`;
+    tip.style.top = `${top}px`;
+  };
+  const hide = () => tip.classList.remove('on');
+
+  document.addEventListener('mouseover', (e) => {
+    const term = e.target.closest?.('.hover-term');
+    if (term) show(term); else hide();
+  });
+  document.addEventListener('focusin', (e) => {
+    const term = e.target.closest?.('.hover-term');
+    if (term) show(term); else hide();
+  });
+  document.addEventListener('scroll', hide, true);
+  $('#detail').addEventListener('scroll', hide);
 }
 
 /* ---------- codex ---------- */
@@ -187,14 +221,34 @@ function matched() {
 function renderGrid() {
   const list = matched();
   $('#count').textContent = list.length;
-  $('#grid').innerHTML = list.map((o) => `
-    <button class="card rank-${o.rank} ${o.id === state.selected ? 'sel' : ''}" data-id="${o.id}">
-      ${icon(o.id, 30)}
-      <span class="card-body">
-        <span class="n">${esc(o.name)}</span>
-        <span class="g"><i class="rank-dot"></i>${GROUPS[o.group] || o.group}</span>
-      </span>
-    </button>`).join('') || '<p class="hint">没有匹配的器官，试试放宽筛选条件。</p>';
+  if (!list.length) {
+    $('#grid').innerHTML = '<p class="hint">没有匹配的器官，试试放宽筛选条件。</p>';
+    return;
+  }
+
+  const groups = new Map();
+  list.forEach((o) => {
+    if (!groups.has(o.group)) groups.set(o.group, []);
+    groups.get(o.group).push(o);
+  });
+  const order = [...groups.entries()].sort((a, b) => b[1].length - a[1].length
+    || (GROUPS[a[0]] || a[0]).localeCompare(GROUPS[b[0]] || b[0], 'zh-CN'));
+
+  $('#grid').innerHTML = order.map(([group, items]) => `
+    <section class="group-block">
+      <div class="group-head">
+        <h3>${GROUPS[group] || group}</h3>
+        <span class="group-count">${items.length}</span>
+      </div>
+      <div class="cardgrid">${items.map((o) => `
+        <button class="card rank-${o.rank} ${o.id === state.selected ? 'sel' : ''}" data-id="${o.id}">
+          ${icon(o.id, 30)}
+          <span class="card-body">
+            <span class="n">${esc(o.name)}</span>
+            <span class="g"><i class="rank-dot"></i>${GROUPS[o.group] || o.group}</span>
+          </span>
+        </button>`).join('')}</div>
+    </section>`).join('');
 }
 
 /* ---------- detail ---------- */
@@ -213,7 +267,7 @@ function showDetail(id) {
   const evTags = o.events.map((e) =>
     `<span class="tag">${esc(state.events[e.event]?.name || e.event)}${e.mode === 'only' ? ' · 仅' : ''}</span>`).join('');
   const activation = (o.activationEffects || []).map((entry) =>
-    `<p class="mc-line activation-line">${renderRich(entry.text, entry.hover)}</p>`).join('');
+    `<p class="mc-line activation-line">${renderRich(entry.text)}</p>`).join('');
 
   $('#detailBody').innerHTML = `
     <div class="d-head">
@@ -252,13 +306,11 @@ function showDetail(id) {
   }
 }
 
-function renderRich(text, hover) {
-  let html = colorize(text);
-  if (hover) {
-    html = `<span class="hover-term" tabindex="0">${colorize(hover.label)}<span class="hover-card">${hover.details.map(colorize).join('<br>')}</span></span>`;
-  }
-  return html.replace(/\[\[([^|]+)\|([^\]]*)\]\]/g, (_, label, details) =>
-    `<span class="hover-term" tabindex="0">${esc(label)}<span class="hover-card">${colorize(details.replace(/\\n/g, '\n'))}</span></span>`);
+function renderRich(text) {
+  return colorize(text).replace(/\[\[([^|]+)\|([^\]]*)\]\]/g, (_, label, details) => {
+    const plain = details.replace(/\\n/g, '\n');
+    return `<span class="hover-term" tabindex="0" data-tip="${esc(plain)}">${esc(label)}</span>`;
+  });
 }
 
 /* ---------- bonds ---------- */
