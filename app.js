@@ -98,14 +98,17 @@ function closeDrawers() {
   $('#detail').classList.remove('open');
   $('#filters').classList.remove('open');
   $('#scrim').classList.remove('on');
+  $('#toggleFilters')?.setAttribute('aria-expanded', 'false');
 }
 
 function initShell() {
   $('#scrim').addEventListener('click', closeDrawers);
   initTooltip();
   $('#toggleFilters').addEventListener('click', () => {
-    $('#filters').classList.add('open');
-    $('#scrim').classList.add('on');
+    const open = !$('#filters').classList.contains('open');
+    $('#filters').classList.toggle('open', open);
+    $('#scrim').classList.toggle('on', open);
+    $('#toggleFilters').setAttribute('aria-expanded', String(open));
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== $('#q') && $('#view-codex').classList.contains('active')) {
@@ -184,11 +187,15 @@ function initCodex() {
 
   $('#eventFilter').addEventListener('change', (e) => { state.filters.event = e.target.value; renderGrid(); });
   $('#scoreFilter').addEventListener('change', (e) => { state.filters.score = e.target.value; renderGrid(); });
-  $('#q').addEventListener('input', (e) => { state.filters.q = e.target.value.trim().toLowerCase(); renderGrid(); });
+  const search = $('#q');
+  const syncSearchState = () => search.closest('.search').classList.toggle('has-value', search.value.length > 0);
+  search.addEventListener('input', (e) => { syncSearchState(); state.filters.q = e.target.value.trim().toLowerCase(); renderGrid(); });
+  syncSearchState();
 
   $('#resetFilters').addEventListener('click', () => {
     state.filters = { q: '', group: '', rank: '', event: '', score: '' };
     $('#q').value = '';
+    $('#q').closest('.search').classList.remove('has-value');
     $('#eventFilter').value = '';
     $('#scoreFilter').value = '';
     $$('.chip').forEach((c) => c.setAttribute('aria-pressed', 'false'));
