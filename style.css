@@ -104,9 +104,8 @@ button:focus,.slot:focus{outline:none}button:focus-visible,.slot:focus-visible{o
 .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(95,208,182,.09)}
 .search-icon{
   position:absolute;left:9px;top:50%;width:11px;height:11px;transform:translateY(-50%);
-  border:1.5px solid var(--dim);border-radius:50%;pointer-events:none;transition:opacity .12s ease;
+  border:1.5px solid var(--dim);border-radius:50%;pointer-events:none;
 }
-.search.has-value .search-icon{opacity:0}
 .search-icon::after{
   content:"";position:absolute;left:7px;top:7px;width:5px;height:1.5px;background:var(--dim);
   transform:rotate(45deg);
