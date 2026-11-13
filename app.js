@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '21';
+const DATA_V = '24';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -347,164 +347,181 @@ function initBonds() {
 const cavity = () => state.invTypes[state.cavityId] || state.invTypes['kubejs:player_17'] ||
   state.invTypes[Object.keys(state.invTypes)[0]];
 
+const dragState = { active: false, moved: false, suppressClick: false, source: null, id: null, slot: null, x: 0, y: 0, ghost: null };
+
 function initBuilder() {
-  const list = Object.values(state.invTypes)
-    .sort((a, b) => b.slots.length - a.slots.length || a.id.localeCompare(b.id));
-  $('#cavitySelect').innerHTML = list.map((t) =>
-    `<option value="${t.id}">${esc(t.name)}${t.usedBy.length ? ` · ${t.usedBy.length} 种胸腔` : ''}</option>`).join('');
-
-  setTimeout(() => {
-    Object.values(state.invTypes).forEach((t) => { if (t.bg) new Image().src = `./${t.bg}?v=${DATA_V}`; });
-  }, 2500);
-
+  const list = Object.values(state.invTypes).sort((a, b) => b.slots.length - a.slots.length || a.id.localeCompare(b.id));
+  $('#cavitySelect').innerHTML = list.map((t) => `<option value="${t.id}">${esc(t.name)}${t.usedBy.length ? ` · ${t.usedBy.length} 种胸腔` : ''}</option>`).join('');
   $('#cavitySelect').value = state.cavityId;
-  $('#cavitySelect').addEventListener('change', (e) => {
-    state.cavityId = e.target.value;
-    state.build = {};
-    renderSlots();
-  });
-  $('#fillDefault').addEventListener('click', () => {
-    state.build = {};
-    cavity().defaultOrgans.forEach((d) => {
-      if (state.organById.has(d.item)) state.build[d.pos] = d.item;
-    });
-    renderSlots();
-  });
+  $('#cavitySelect').addEventListener('change', (e) => { state.cavityId = e.target.value; state.build = {}; renderSlots(); });
+  $('#fillDefault').addEventListener('click', () => { state.build = {}; cavity().defaultOrgans.forEach((d) => { if (state.organById.has(d.item)) state.build[d.pos] = d.item; }); renderSlots(); });
   $('#clearBuild').addEventListener('click', () => { state.build = {}; renderSlots(); });
-
-  $('#exportBtn').addEventListener('click', () => {
-    $('#share').value = b64urlEncode(JSON.stringify({ c: state.cavityId, s: state.build }));
-  });
+  $('#exportBtn').addEventListener('click', () => { $('#share').value = b64urlEncode(JSON.stringify({ c: state.cavityId, s: state.build })); });
   $('#importBtn').addEventListener('click', () => {
     try {
       const data = JSON.parse(b64urlDecode($('#share').value.trim()));
       if (!state.invTypes[data.c]) throw new Error('未知槽位布局');
-      state.cavityId = data.c;
-      $('#cavitySelect').value = data.c;
-      state.build = {};
+      state.cavityId = data.c; $('#cavitySelect').value = data.c; state.build = {};
       Object.entries(data.s || {}).forEach(([k, v]) => { if (state.organById.has(v)) state.build[k] = v; });
       renderSlots();
-    } catch (err) {
-      $('#share').value = '分享码无效：' + err.message;
-    }
+    } catch (err) { $('#share').value = '分享码无效：' + err.message; }
   });
-
-  $('#pickList').addEventListener('click', (e) => {
-    const c = e.target.closest('.card');
-    if (!c) return;
-    state.build[state.pickSlot] = c.dataset.id;
-    closePicker();
-    renderSlots();
-  });
+  initLibrary();
+  $('#pickList').addEventListener('click', (e) => { const c = e.target.closest('.card'); if (!c) return; state.build[state.pickSlot] = c.dataset.id; closePicker(); renderSlots(); });
   $('#pickQ').addEventListener('input', renderPickList);
-  $('#pickClear').addEventListener('click', () => {
-    delete state.build[state.pickSlot];
-    closePicker();
-    renderSlots();
-  });
+  $('#pickClear').addEventListener('click', () => { delete state.build[state.pickSlot]; closePicker(); renderSlots(); });
   $('#picker').addEventListener('click', (e) => { if (e.target.id === 'picker') closePicker(); });
   renderSlots();
 }
 
+function initLibrary() {
+  const groups = [...new Set(state.organs.map((o) => o.group))].sort((a, b) => (GROUPS[a] || a).localeCompare(GROUPS[b] || b, 'zh-CN'));
+  $('#libraryGroup').innerHTML += groups.map((g) => `<option value="${esc(g)}">${esc(GROUPS[g] || g)}</option>`).join('');
+  $('#libraryQ').addEventListener('input', renderLibrary);
+  $('#libraryGroup').addEventListener('change', renderLibrary);
+  $('#libraryRank').addEventListener('change', renderLibrary);
+  $('#libraryList').addEventListener('pointerdown', onDragStart);
+  $('#libraryList').addEventListener('click', (e) => {
+    if (dragState.moved || dragState.suppressClick) { dragState.suppressClick = false; return; }
+    const card = e.target.closest('.library-card');
+    if (!card) return;
+    const first = cavity().slots.findIndex((_, i) => !state.build[i]);
+    if (first >= 0) { state.build[first] = card.dataset.id; renderSlots(); }
+  });
+  renderLibrary();
+}
+
+function renderLibrary() {
+  const q = $('#libraryQ').value.trim().toLowerCase();
+  const group = $('#libraryGroup').value;
+  const order = $('#libraryRank').value;
+  const list = state.organs.filter((o) => (!group || o.group === group) && (!q || `${o.name} ${o.id} ${o.path}`.toLowerCase().includes(q)))
+    .sort((a, b) => (order === 'asc' ? a.rank - b.rank : b.rank - a.rank) || a.name.localeCompare(b.name, 'zh-CN'));
+  $('#libraryCount').textContent = list.length;
+  $('#libraryList').innerHTML = list.map((o) => `<button class="library-card rank-${o.rank}" data-id="${esc(o.id)}" type="button">${icon(o.id, 28)}<span class="library-card-body"><b>${esc(o.name)}</b><small><i class="rank-dot"></i>${esc(GROUPS[o.group] || o.group)}</small></span></button>`).join('');
+}
+
+function onDragStart(e) {
+  const card = e.target.closest('.library-card');
+  if (!card || e.button !== 0) return;
+  beginDrag(e, 'library', card.dataset.id, null, card);
+}
+
+function beginDrag(e, source, id, slot, element) {
+  dragState.active = true; dragState.moved = false; dragState.source = source; dragState.id = id; dragState.slot = slot; dragState.x = e.clientX; dragState.y = e.clientY;
+  element.classList.add('drag-armed');
+  const move = (ev) => onDragMove(ev, element);
+  const up = (ev) => onDragEnd(ev, element, move, up);
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up, { once: true });
+  document.addEventListener('pointercancel', up, { once: true });
+}
+
+function onDragMove(e, element) {
+  const dist = Math.hypot(e.clientX - dragState.x, e.clientY - dragState.y);
+  if (!dragState.moved && dist <= 5) return;
+  if (!dragState.moved) {
+    dragState.moved = true; element.classList.add('dragging');
+    dragState.ghost = document.createElement('div'); dragState.ghost.className = 'drag-ghost'; dragState.ghost.innerHTML = icon(dragState.id, 34); document.body.appendChild(dragState.ghost);
+  }
+  dragState.ghost.style.transform = `translate(${e.clientX + 14}px,${e.clientY + 14}px)`;
+  clearDropStates();
+  const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
+  if (target) target.classList.add('drop-target');
+  if (dragState.source === 'slot' && document.elementFromPoint(e.clientX, e.clientY)?.closest('#removeZone')) $('#removeZone').classList.add('hot');
+}
+
+function onDragEnd(e, element, move, up) {
+  document.removeEventListener('pointermove', move);
+  document.removeEventListener('pointercancel', up);
+  clearDropStates();
+  element.classList.remove('drag-armed', 'dragging');
+  const moved = dragState.moved;
+  const source = dragState.source;
+  const from = dragState.slot;
+  const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
+  const remove = document.elementFromPoint(e.clientX, e.clientY)?.closest('#removeZone');
+  if (dragState.ghost) dragState.ghost.remove();
+  if (moved) {
+    dragState.suppressClick = true;
+    if (remove || (source === 'slot' && !target)) {
+      if (source === 'slot') delete state.build[from];
+    } else if (target) {
+      const to = Number(target.dataset.i);
+      if (source === 'slot') { const old = state.build[to]; state.build[to] = dragState.id; if (old) state.build[from] = old; else delete state.build[from]; }
+      else state.build[to] = dragState.id;
+    }
+    renderSlots();
+  }
+  dragState.active = false; dragState.moved = false; dragState.source = null; dragState.id = null; dragState.slot = null;
+}
+
+function clearDropStates() { $$('.slot.drop-target').forEach((x) => x.classList.remove('drop-target')); $('#removeZone').classList.remove('hot'); }
+
 const b64urlEncode = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const b64urlDecode = (s) => {
-  const p = s.replace(/-/g, '+').replace(/_/g, '/');
-  return decodeURIComponent(escape(atob(p + '='.repeat((4 - (p.length % 4)) % 4))));
-};
+const b64urlDecode = (s) => { const p = s.replace(/-/g, '+').replace(/_/g, '/'); return decodeURIComponent(escape(atob(p + '='.repeat((4 - (p.length % 4)) % 4)))); };
 
 function renderSlots() {
-  const it = cavity();
-  const grid = $('#slotgrid');
-  if (!it || !it.slots.length) {
-    grid.innerHTML = '<p class="hint">该胸腔类型没有槽位数据。</p>';
-    $('#cavityHint').textContent = '';
-    renderTotals();
-    return;
-  }
-  const slots = it.slots;
-  const bgW = (it.size && it.size.x) || (Math.max(...slots.map((s) => s.x)) + 18);
-  const bgH = (it.size && it.size.y) || (Math.max(...slots.map((s) => s.y)) + 18);
-  const k = Math.min(2, 620 / bgW);
-  const size = Math.round(16 * k);
-  grid.style.position = 'relative';
-  grid.style.width = `${Math.round(bgW * k)}px`;
-  grid.style.height = `${Math.round(bgH * k)}px`;
-  if (it.bg) {
-    grid.classList.add('has-bg');
-    grid.style.backgroundImage = `url("./${it.bg}?v=${DATA_V}")`;
-    grid.style.backgroundSize = `${Math.round((it.texW || bgW) * k)}px ${Math.round((it.texH || bgH) * k)}px`;
-    grid.style.backgroundPosition = '0 0';
-  } else {
-    grid.classList.remove('has-bg');
-    grid.style.backgroundImage = '';
-  }
-
-  grid.innerHTML = slots.map((s, i) => {
-    const organId = state.build[i];
-    const o = organId ? state.organById.get(organId) : null;
-    const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`;
-    return `<div class="slot ${o ? '' : 'empty'}" data-i="${i}" style="${style}" title="${o ? esc(o.name) : '空槽位'}">
-      ${o ? icon(o.id, size) : ''}
-      ${s.type ? `<span class="st">${esc(s.type.split('_')[0])}</span>` : ''}
-    </div>`;
-  }).join('');
-
-  grid.onclick = (e) => {
-    const el = e.target.closest('.slot');
-    if (el) openPicker(Number(el.dataset.i));
-  };
-  const users = it.usedBy.length ? ` · 用于 ${it.usedBy.length} 种胸腔` : ' · 未被任何胸腔类型使用';
-  $('#cavityHint').textContent = `${it.name}${users}${it.defaultOrgans.length ? ` · 默认 ${it.defaultOrgans.length} 件器官` : ''}`;
-  renderTotals();
+  const it = cavity(); const grid = $('#slotgrid');
+  if (!it || !it.slots.length) { grid.innerHTML = '<p class="hint">该胸腔类型没有槽位数据。</p>'; $('#cavityHint').textContent = ''; renderTotals(); return; }
+  const slots = it.slots; const bgW = (it.size && it.size.x) || (Math.max(...slots.map((s) => s.x)) + 18); const bgH = (it.size && it.size.y) || (Math.max(...slots.map((s) => s.y)) + 18); const k = Math.min(2, 620 / bgW); const size = Math.round(16 * k);
+  grid.style.position = 'relative'; grid.style.width = `${Math.round(bgW * k)}px`; grid.style.height = `${Math.round(bgH * k)}px`;
+  if (it.bg) { grid.classList.add('has-bg'); grid.style.backgroundImage = `url("./${it.bg}?v=${DATA_V}")`; grid.style.backgroundSize = `${Math.round((it.texW || bgW) * k)}px ${Math.round((it.texH || bgH) * k)}px`; grid.style.backgroundPosition = '0 0'; } else { grid.classList.remove('has-bg'); grid.style.backgroundImage = ''; }
+  grid.innerHTML = slots.map((s, i) => { const organId = state.build[i]; const o = organId ? state.organById.get(organId) : null; const style = `left:${Math.round(s.x * k)}px;top:${Math.round(s.y * k)}px;width:${size}px;height:${size}px`; return `<div class="slot ${o ? '' : 'empty'}" data-i="${i}" style="${style}" title="${o ? esc(o.name) : '空槽位'}">${o ? icon(o.id, size) : ''}${s.type ? `<span class="st">${esc(s.type.split('_')[0])}</span>` : ''}</div>`; }).join('');
+  grid.onpointerdown = (e) => { if (e.button !== 0) return; const el = e.target.closest('.slot'); if (!el) return; const i = Number(el.dataset.i); const id = state.build[i]; if (id) beginDrag(e, 'slot', id, i, el); };
+  grid.onclick = (e) => { const el = e.target.closest('.slot'); if (el && !dragState.moved) { $$('.slot.selected').forEach((x) => x.classList.remove('selected')); el.classList.add('selected'); if (!state.build[Number(el.dataset.i)]) openPicker(Number(el.dataset.i)); } };
+  grid.oncontextmenu = (e) => { const el = e.target.closest('.slot'); if (!el) return; e.preventDefault(); delete state.build[Number(el.dataset.i)]; renderSlots(); };
+  grid.ondblclick = (e) => { const el = e.target.closest('.slot'); if (el && state.build[Number(el.dataset.i)]) { delete state.build[Number(el.dataset.i)]; renderSlots(); } };
+  const users = it.usedBy.length ? ` · 用于 ${it.usedBy.length} 种胸腔` : ' · 未被任何胸腔类型使用'; $('#cavityHint').textContent = `${it.name}${users}${it.defaultOrgans.length ? ` · 默认 ${it.defaultOrgans.length} 件器官` : ''}`; renderTotals();
 }
 
 function renderTotals() {
   const c = cavity();
   const acc = {};
-  (c.baseScores || []).forEach((s) => { acc[s.id] = (acc[s.id] || 0) + Number(s.value); });
+  (c.baseScores || []).forEach((score) => { acc[score.id] = (acc[score.id] || 0) + Number(score.value); });
   Object.values(state.build).forEach((id) => {
     const o = state.organById.get(id);
     if (o) Object.entries(o.scores).forEach(([k, v]) => { acc[k] = (acc[k] || 0) + v; });
   });
-  const rows = Object.entries(acc)
-    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
-    .map(([k, v]) => `<div class="total-row"><span class="muted">${esc(state.scores[k]?.name || k)}</span><span>${v > 0 ? '+' : ''}${round(v)}</span></div>`)
-    .join('');
+  const rows = Object.entries(acc).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .map(([k, v]) => `<div class="total-row"><span class="muted">${esc(state.scores[k]?.name || k)}</span><span>${v > 0 ? '+' : ''}${round(v)}</span></div>`).join('');
   const filled = Object.keys(state.build).length;
-  $('#totals').innerHTML = (filled ? `<div class="total-row"><span class="muted">已放器官</span><span>${filled}</span></div>` : '') +
-    (rows || '<span class="hint">尚未放入器官</span>');
+  $('#totals').innerHTML = (filled ? `<div class="total-row"><span class="muted">已放器官</span><span>${filled}</span></div>` : '') + (rows || '<span class="hint">尚未放入器官</span>');
   renderSpecial();
   renderBondEffects();
 }
 
 function placedOrgans() {
   const seen = new Set();
-  return Object.values(state.build).map((id) => state.organById.get(id))
-    .filter((o) => o && !seen.has(o.id) && seen.add(o.id));
+  return Object.values(state.build).map((id) => state.organById.get(id)).filter((o) => o && !seen.has(o.id) && seen.add(o.id));
 }
 
 function renderSpecial() {
   const lines = [];
   placedOrgans().forEach((o) => {
     const fx = (o.effectsResolved && o.effectsResolved.length ? o.effectsResolved : o.effects) || [];
-    if (!fx.length) return;
-    lines.push(`<div class="fx-row"><span class="fx-name">${esc(o.name)}</span>` +
-      `<span class="fx-text">${colorize(fx.map((t) => t.trim()).filter(Boolean).join('\n'))}</span></div>`);
+    const activation = o.activationEffects || [];
+    const slots = o.slotEffects || [];
+    if (!fx.length && !activation.length && !slots.length) return;
+    const body = [];
+    if (fx.length) body.push(`<div>${fx.map((t) => t.trim()).filter(Boolean).map(renderRich).join('<br>')}</div>`);
+    if (activation.length) body.push(`<div class="activation-line">槽位激活：${activation.map((entry) => renderRich(entry.text || entry)).join('<br>')}</div>`);
+    if (slots.length) body.push(`<div class="slot-fx">${slots.map((text) => esc(text)).join('<br>')}</div>`);
+    lines.push(`<div class="fx-row"><span class="fx-name">${esc(o.name)}</span><span class="fx-text">${body.join('')}</span></div>`);
   });
   $('#special').innerHTML = lines.length ? lines.join('') : '<span class="hint">所选器官没有特殊效果</span>';
 }
 
 function renderBondEffects() {
   const counts = {};
-  placedOrgans().forEach((o) => (state.bondTags.get(o.id) || []).forEach((t) => { counts[t] = (counts[t] || 0) + 1; }));
+  placedOrgans().forEach((o) => (state.bondTags.get(o.id) || []).forEach((tag) => { counts[tag] = (counts[tag] || 0) + 1; }));
   const blocks = [];
   state.bonds.forEach((b) => {
     const n = counts[b.tag] || 0;
     if (!n) return;
     const hit = b.thresholds.filter((t) => n >= t.count);
     if (!hit.length) return;
-    const steps = hit.map((t) =>
-      `<li><span class="step-n">${t.count} 件</span><span class="step-t">${esc(t.text.replace(/^（\d+）/, ''))}</span></li>`).join('');
+    const steps = hit.map((t) => `<li><span class="step-n">${t.count} 件</span><span class="step-t">${esc(t.text.replace(/^（\d+）/, ''))}</span></li>`).join('');
     blocks.push(`<div class="fx-row"><div class="fx-name">${esc(b.name)} · ${n} 件</div><ul class="bond-steps">${steps}</ul></div>`);
   });
   $('#bondfx').innerHTML = blocks.length ? blocks.join('') : '<span class="hint">尚未触发羁绊</span>';

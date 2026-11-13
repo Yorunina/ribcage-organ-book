@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RibCage 器官图鉴</title>
 <meta name="description" content="No Flesh Within Chest 2 · 器官图鉴与构筑器">
-<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=23">
-<link rel="stylesheet" href="./style.css?v=23">
+<link rel="preload" as="image" href="./mc/gui/kubejs_player_17.png?v=24">
+<link rel="stylesheet" href="./style.css?v=24">
 </head>
 <body>
 <header class="top">
@@ -71,42 +71,31 @@
   </section>
 
   <section class="view" id="view-builder">
-    <div class="builder">
-      <div class="panel builder-main">
+    <div class="builder-workbench">
+      <aside class="panel organ-library" id="organLibrary">
+        <div class="library-head">
+          <div><span class="eyebrow">ORGAN LIBRARY</span><h2>器官库</h2></div>
+          <span class="library-count" id="libraryCount">—</span>
+        </div>
+        <label class="search library-search"><span class="search-icon" aria-hidden="true"></span><input type="search" id="libraryQ" placeholder="搜索名称 / ID" autocomplete="off"></label>
+        <div class="library-filters"><select id="libraryGroup"><option value="">全部分类</option></select><select id="libraryRank"><option value="">Rank 排序</option><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></div>
+        <div class="library-list" id="libraryList"></div>
+      </aside>
+      <section class="panel builder-main">
         <div class="builder-head">
-          <label class="field">
-            <span>胸腔槽位布局</span>
-            <select id="cavitySelect"></select>
-          </label>
-          <div class="row">
-            <button class="btn" id="fillDefault">填入默认器官</button>
-            <button class="btn ghost" id="clearBuild">清空</button>
-          </div>
+          <div><span class="eyebrow">BUILD WORKSPACE</span><h2>胸腔构筑</h2></div>
+          <label class="field compact"><span>槽位布局</span><select id="cavitySelect"></select></label>
+          <div class="row"><button class="btn" id="fillDefault">填入默认器官</button><button class="btn ghost" id="clearBuild">清空</button></div>
         </div>
-        <div class="cavity"><div class="slotgrid" id="slotgrid"></div></div>
+        <div class="builder-tip"><span class="tip-key">拖拽</span>器官入槽 · 槽位互换 · 拖出移除 <span class="tip-sep">/</span> <span class="tip-key">右键</span>卸下器官</div>
+        <div class="cavity"><div class="slotgrid" id="slotgrid"></div><div class="remove-zone" id="removeZone"><b>移除器官</b><span>拖到这里松手</span></div></div>
         <p class="hint" id="cavityHint"></p>
-      </div>
+      </section>
       <aside class="builder-side">
-        <div class="panel">
-          <h3>属性合计</h3>
-          <div class="totals" id="totals"><span class="hint">尚未放入器官</span></div>
-        </div>
-        <div class="panel">
-          <h3>特殊效果</h3>
-          <div class="fx" id="special"><span class="hint">尚未放入器官</span></div>
-        </div>
-        <div class="panel">
-          <h3>羁绊效果</h3>
-          <div class="fx" id="bondfx"><span class="hint">尚未触发羁绊</span></div>
-        </div>
-        <div class="panel">
-          <h3>分享码</h3>
-          <div class="row" style="margin-bottom:8px">
-            <button class="btn primary" id="exportBtn">导出</button>
-            <button class="btn" id="importBtn">导入</button>
-          </div>
-          <textarea id="share" rows="3" placeholder="分享码会显示在这里，或粘贴分享码后点导入"></textarea>
-        </div>
+        <div class="panel result-panel"><div class="panel-label">BUILD READOUT</div><h3>属性合计</h3><div class="totals" id="totals"><span class="hint">尚未放入器官</span></div></div>
+        <div class="panel result-panel"><h3>特殊效果 <span class="panel-note">实时</span></h3><div class="fx" id="special"><span class="hint">尚未放入器官</span></div></div>
+        <div class="panel result-panel"><h3>羁绊效果</h3><div class="fx" id="bondfx"><span class="hint">尚未触发羁绊</span></div></div>
+        <div class="panel result-panel share-panel"><h3>分享码</h3><div class="row share-actions"><button class="btn primary" id="exportBtn">导出</button><button class="btn" id="importBtn">导入</button></div><textarea id="share" rows="3" placeholder="导出后复制，或粘贴分享码导入"></textarea></div>
       </aside>
     </div>
   </section>
@@ -130,6 +119,6 @@
   <div class="list" id="pickList"></div>
 </div></div>
 
-<script src="./app.js?v=23"></script>
+<script src="./app.js?v=24"></script>
 </body>
 </html>
