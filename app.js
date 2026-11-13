@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '18';
+const DATA_V = '20';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -124,7 +124,7 @@ function initCodex() {
 
   const ranks = [...new Set(state.organs.map((o) => o.rank))].sort((a, b) => a - b);
   $('#ranks').innerHTML = ranks.map((r) =>
-    `<button class="chip" data-r="${r}" aria-pressed="false">R${r}</button>`).join('');
+    `<button class="chip" data-r="${r}" aria-pressed="false">阶级 ${r}</button>`).join('');
 
   const evs = Object.entries(state.events).sort((a, b) => b[1].organs.length - a[1].organs.length);
   $('#eventFilter').innerHTML = '<option value="">全部事件</option>' +
@@ -171,7 +171,7 @@ function initCodex() {
 
 function matched() {
   const f = state.filters;
-  return state.organs.filter((o) => {
+  return [...state.organs].filter((o) => {
     if (f.group && o.group !== f.group) return false;
     if (f.rank !== '' && String(o.rank) !== f.rank) return false;
     if (f.event && !o.events.some((e) => e.event === f.event)) return false;
@@ -181,7 +181,7 @@ function matched() {
       if (!hay.includes(f.q)) return false;
     }
     return true;
-  });
+  }).sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name, 'zh-CN'));
 }
 
 function renderGrid() {
@@ -192,7 +192,7 @@ function renderGrid() {
       ${icon(o.id, 30)}
       <span class="card-body">
         <span class="n">${esc(o.name)}</span>
-        <span class="g"><i class="rank-dot"></i>${GROUPS[o.group] || o.group} · R${o.rank}</span>
+        <span class="g"><i class="rank-dot"></i>${GROUPS[o.group] || o.group}</span>
       </span>
     </button>`).join('') || '<p class="hint">没有匹配的器官，试试放宽筛选条件。</p>';
 }
@@ -212,6 +212,8 @@ function showDetail(id) {
   const effects = (o.effectsResolved && o.effectsResolved.length ? o.effectsResolved : o.effects) || [];
   const evTags = o.events.map((e) =>
     `<span class="tag">${esc(state.events[e.event]?.name || e.event)}${e.mode === 'only' ? ' · 仅' : ''}</span>`).join('');
+  const activation = (o.activationEffects || []).map((entry) =>
+    `<p class="mc-line activation-line">${renderRich(entry.text, entry.hover)}</p>`).join('');
 
   $('#detailBody').innerHTML = `
     <div class="d-head">
@@ -231,6 +233,7 @@ function showDetail(id) {
     </div>
     ${o.flavor.length ? `<section class="d-sec"><h4>描述</h4>${o.flavor.map((t) => `<p class="d-flavor">${colorize(t)}</p>`).join('')}</section>` : ''}
     ${effects.length ? `<section class="d-sec"><h4>特殊效果</h4>${effects.map((t) => `<p class="mc-line">${colorize(t)}</p>`).join('')}</section>` : ''}
+    ${activation ? `<section class="d-sec"><h4>槽位激活效果</h4>${activation}</section>` : ''}
     ${o.slotEffects?.length ? `<section class="d-sec"><h4>槽位效果</h4>${o.slotEffects.map((t) => `<p class="slot-fx">${esc(t)}</p>`).join('')}</section>` : ''}
     ${scoreRows ? `<section class="d-sec"><h4>基础属性</h4>${scoreRows}</section>` : ''}
     ${o.obtain ? `<section class="d-sec"><h4>获取方式</h4><p class="d-obtain">${colorize(o.obtain)}</p></section>` : ''}
@@ -247,6 +250,15 @@ function showDetail(id) {
     $('#detail').classList.add('open');
     $('#scrim').classList.add('on');
   }
+}
+
+function renderRich(text, hover) {
+  let html = colorize(text);
+  if (hover) {
+    html = `<span class="hover-term" tabindex="0">${colorize(hover.label)}<span class="hover-card">${hover.details.map(colorize).join('<br>')}</span></span>`;
+  }
+  return html.replace(/\[\[([^|]+)\|([^\]]*)\]\]/g, (_, label, details) =>
+    `<span class="hover-term" tabindex="0">${esc(label)}<span class="hover-card">${colorize(details.replace(/\\n/g, '\n'))}</span></span>`);
 }
 
 /* ---------- bonds ---------- */

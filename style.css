@@ -156,6 +156,8 @@ select:focus,textarea:focus{border-color:var(--accent)}
 .rank-2 .rank-dot{background:var(--r2)}
 .rank-3 .rank-dot{background:var(--r3)}
 .rank-4 .rank-dot{background:var(--r4)}
+.rank-5 .rank-dot{background:#f27777}
+.rank-6 .rank-dot{background:#f4f4f4}
 
 /* ---------- inspector ---------- */
 .detail{
@@ -216,6 +218,10 @@ select:focus,textarea:focus{border-color:var(--accent)}
 .d-obtain{font-size:11.5px;line-height:1.65;color:#a9b7c7}
 .event-chips{display:flex;flex-wrap:wrap;gap:4px}
 .slot-fx{font-size:11.5px;line-height:1.7;color:#c8b993}
+.activation-line{color:#d6c38f}
+.hover-term{position:relative;color:#f0c968;text-decoration:underline dotted;cursor:help}
+.hover-card{display:none;position:absolute;z-index:80;left:0;bottom:calc(100% + 8px);width:260px;padding:8px 10px;background:#0b1017;border:1px solid #485867;border-radius:4px;box-shadow:0 10px 30px #0009;color:var(--text);font-size:11px;line-height:1.55;white-space:normal}
+.hover-term:hover .hover-card,.hover-term:focus .hover-card{display:block}
 
 /* ---------- builder ---------- */
 .builder{display:grid;grid-template-columns:minmax(0,1fr) 344px;gap:16px;align-items:start}
