@@ -32,7 +32,6 @@
    "kubejs:malignant_neuron_tumor",
    "kubejs:mutation_intestine",
    "kubejs:nightmare_core",
-   "kubejs:rosy_tumor",
    "kubejs:rotten_appendix",
    "kubejs:rotten_heart",
    "kubejs:rotten_intestine",
@@ -45,8 +44,6 @@
    "kubejs:rotten_spleen",
    "kubejs:rotten_stomach",
    "kubejs:soul_core",
-   "kubejs:tumor",
-   "kubejs:unformed_tumor",
    "kubejs:witch_fibroma",
    "kubejs:wither_bone_cage",
    "kubejs:worm_neuron",
@@ -645,8 +642,7 @@
    "kubejs:rose_quartz_heart",
    "kubejs:rose_quartz_liver",
    "kubejs:rose_quartz_muscle",
-   "kubejs:rose_quartz_rib",
-   "kubejs:rosy_tumor"
+   "kubejs:rose_quartz_rib"
   ]
  }
 ]

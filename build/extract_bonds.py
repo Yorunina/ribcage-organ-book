@@ -49,6 +49,8 @@ def tag_effects():
 
 def main() -> None:
     lang = json.loads(LANG.read_text(encoding="utf-8"))
+    organs_path = OUT.parent / "organs.json"
+    known_organs = {item["id"] for item in json.loads(organs_path.read_text(encoding="utf-8"))}
     names = {}
     thresholds = {}
     for key, value in lang.items():
@@ -67,7 +69,7 @@ def main() -> None:
 
     bonds = []
     for tag, info in sorted(tag_effects().items()):
-        organs = sorted(by_tag.get(tag, []))
+        organs = sorted(item_id for item_id in by_tag.get(tag, []) if item_id in known_organs)
         if not organs:
             continue
         bonds.append({
