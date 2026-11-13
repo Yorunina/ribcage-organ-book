@@ -1,8 +1,8 @@
-# RibCage 器官图鉴 / 构筑器
+# RibCage Organ Book / 构筑器
 
 No Flesh Within Chest 2 的器官静态站，纯前端（原生 HTML/CSS/JS），无框架、无后端、无外部依赖。
 
-在线地址：https://yorunina.github.io/ribcage-organ-codex/
+在线地址：https://yorunina.github.io/ribcage-organ-book/
 
 ## 功能
 
