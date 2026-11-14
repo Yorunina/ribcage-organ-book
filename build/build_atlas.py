@@ -8,7 +8,7 @@ organs = json.load(open(SITE / 'data/organs.json', encoding='utf-8'))
 COLS = 20
 CELL = 16
 
-items = [(o['id'], o['texture']) for o in organs if o.get('texture')]
+items = [(o['id'], o.get('textureUrl') or o.get('texture')) for o in organs if o.get('textureUrl') or o.get('texture')]
 rows = (len(items) + COLS - 1) // COLS
 atlas = Image.new('RGBA', (COLS * CELL, rows * CELL), (0, 0, 0, 0))
 index = {'cols': COLS, 'cell': CELL, 'rows': rows, 'map': {}}

@@ -96,7 +96,7 @@
   ]
  },
  {
-  "tag": "kubejs:giant_organ",
+  "tag": "kubejs:giant",
   "name": "巨型器官",
   "events": [
    "胸腔变化时"

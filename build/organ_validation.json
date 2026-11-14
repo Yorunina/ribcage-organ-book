@@ -1,0 +1,13 @@
+{
+  "organs": 337,
+  "warnings": [],
+  "errors": [],
+  "counts": {
+    "withTexture": 337,
+    "missingTexture": 0,
+    "withSource": 337,
+    "withTooltipKeys": 269,
+    "placeholderCount": 206,
+    "placeholderOrganCount": 115
+  }
+}

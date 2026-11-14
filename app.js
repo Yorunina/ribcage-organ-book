@@ -11,7 +11,7 @@ const state = {
   pickSlot: null,
 };
 
-const DATA_V = '27';
+const DATA_V = '30';
 const GROUPS = {
   nature: '自然', ender: '末影', nether: '下界', factory: '工厂', machine: '机械',
   magic: '魔法', food: '食物', infected: '感染', plants: '植物', relics: '遗物',
@@ -55,6 +55,12 @@ function colorize(text) {
 }
 
 function icon(id, size) {
+  const organ = state.organById.get(id);
+  const direct = organ?.textureUrl || organ?.texture;
+  if (direct) {
+    const mode = organ?.textureMode || 'raw';
+    return `<img class="ico direct-ico direct-${mode}" src="./${esc(direct)}?v=${DATA_V}" width="${size}" height="${size}" alt="">`;
+  }
   const pos = state.atlas.map[id];
   if (!pos) return `<i class="ico" style="width:${size}px;height:${size}px"></i>`;
   const scale = state.atlas.cols * size;
